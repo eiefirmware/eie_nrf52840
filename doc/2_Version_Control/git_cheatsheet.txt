@@ -23,3 +23,15 @@ git rebase
 git fetch
 	- Downloads commits, files, and refs from a remote repository into your local repository, but does not automatically merge or modify your working directory (unlike git pull)
 	- none yet
+git add
+	- Moves changes from your working directory into the staging area (index), preparing them to be included in the next commit.
+	- <file>: The specific file to stage (e.g., git_cheatsheet.txt). .: Stages all changes in the current directory and its subdirectories.
+git status
+	- Displays the state of the working directory and staging area, showing which files are untracked, modified, or staged.
+	- none
+git log
+	- Displays the history of commits for the current branch, with the newest commit appearing at the top.
+	- none
+A note about -u <remote> <branch> under git push
+	- Uploads your local branch commits to the specified remote repository (e.g., GitHub).
+	- <remote>: The name of the remote repository (e.g., origin). <branch>: The name of the local branch to push (e.g., lesson2). -u (--set-upstream): Used only for the first push of a new branch to establish a tracking relationship between the local and remote branches
