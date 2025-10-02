@@ -35,3 +35,6 @@ git log
 A note about -u <remote> <branch> under git push
 	- Uploads your local branch commits to the specified remote repository (e.g., GitHub).
 	- <remote>: The name of the remote repository (e.g., origin). <branch>: The name of the local branch to push (e.g., lesson2). -u (--set-upstream): Used only for the first push of a new branch to establish a tracking relationship between the local and remote branches
+git diff
+	- Shows the difference between your Working Directory (files you've modified but not yet staged with git add) and the Staging Area (index). In other words, it shows your unstaged changes
+	- none
