@@ -1,0 +1,25 @@
+git commit
+	- Records changes to the repository with a message. This creates a new commit object.
+	- none yet
+git branch
+	- Used to create, list, rename, or delete branches.
+	- branch-name: Creates a new branch with the given name (e.g., git branch feature/x).
+git checkout
+	- Used to switch branches or restore working tree files. It moves the HEAD pointer.
+	- branch-name: Switches to the specified existing branch.
+	-b new-branch-name: Creates a new branch and immediately switches to it.
+git pull
+	- Fetches changes from a remote repository and immediately merges them into the current branch. It's a combination of git fetch and git merge
+	- none yet
+git push
+	- Uploads local branch commits to a remote repositor
+	- none yet
+git merge
+	- Combines a sequence of commits from one branch into another.
+	- branch-name: Merges the specified branch into the currently checked-out branch.
+git rebase
+	- Moves or combines a sequence of commits to a new base commit. It rewrites project history to create a linear sequence of commits.
+	- branch-name: Replays the commits from the current branch onto the tip of the specified branch.
+git fetch
+	- Downloads commits, files, and refs from a remote repository into your local repository, but does not automatically merge or modify your working directory (unlike git pull)
+	- none yet
