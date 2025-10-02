@@ -39,7 +39,7 @@ git diff
 	- Shows the difference between your Working Directory (files you've modified but not yet staged with git add) and the Staging Area (index). In other words, it shows your unstaged changes
 	- none
 
-
+- sync to eie fork so that i have all instructions in my repo
 when u make changes locally and then want to push to github
 - git diff
 - git status
