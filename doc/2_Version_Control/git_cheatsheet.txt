@@ -38,3 +38,10 @@ A note about -u <remote> <branch> under git push
 git diff
 	- Shows the difference between your Working Directory (files you've modified but not yet staged with git add) and the Staging Area (index). In other words, it shows your unstaged changes
 	- none
+
+
+when u make changes locally and then want to push to github
+- git diff
+- git status
+- git commit -m 'message'
+- git push
