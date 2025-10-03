@@ -45,3 +45,5 @@ when u make changes locally and then want to push to github
 - git status
 - git commit -m 'message'
 - git push
+
+git push --set-upstream origin <lesson#>
