@@ -181,7 +181,7 @@ Additionally Nordic's DevAcadamy introductory course on the nRF Connect SDK cove
 git fetch upstream
 git checkout embedded_primer
 ----
-. In the `app/src` directory, create a new `main.c` file
+. In the `app/` directory, create a new `src/` directory, as well as a new `main.c` file inside of `app/src/`. 
 . KConfig is a configuration system originally developed for linux kernel development.
 It allows developers to set configuration options for their application that are set at compile time.
 In Zephyr these options are used to enable or disable features in the kernal and enable specific libraries.
