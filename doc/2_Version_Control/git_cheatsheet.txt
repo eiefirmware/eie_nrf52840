@@ -47,3 +47,5 @@ when u make changes locally and then want to push to github
 - git push
 
 git push --set-upstream origin <lesson#>
+
+- anytime im working with west and stuff, i need to use ... source .venv/Scripts/activate to get in my venv then go back in
