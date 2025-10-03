@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../modules"
+		},
+		{
+			"path": "../zephyr"
+		}
+	],
+	"settings": {}
+}

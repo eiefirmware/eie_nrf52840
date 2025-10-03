@@ -179,8 +179,9 @@ Additionally Nordic's DevAcadamy introductory course on the nRF Connect SDK cove
 +
 ----
 git fetch upstream
-git checkout embedded_primer
+git checkout upstream embedded_primer
 ----
+. VSCode tips: In addition to opening your git repository in your editor (see `code . ` command), you can add directories like the `../modules` and `../zephyr` diretories. This will help vscode look into the HAL layer for your definition of includes. You can then save this as a workspace for future use. (see `eie_nrf52840.git.code-workspace`).
 . In the `app/` directory, create a new `src/` directory, as well as a new `main.c` file inside of `app/src/`. 
 . KConfig is a configuration system originally developed for linux kernel development.
 It allows developers to set configuration options for their application that are set at compile time.
