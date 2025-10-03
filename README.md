@@ -23,3 +23,4 @@ The firmware used for EIE is based on the Zephyr RTOS and is contained within th
 
 1. [Getting Started](doc/1_Getting_Started/README.MD)
 2. [Version Control](doc/2_Version_Control/README.MD)
+3. [Embedded Primer](doc/3_Embedded_Primer/embedded_primer.adoc)
