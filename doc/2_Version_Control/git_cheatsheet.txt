@@ -1,0 +1,8 @@
+git commit - creates a new commit from staged changes
+git branch - shows, creates, renames, or deletes branches
+git checkout - switches HEAD to a branch or commit, or restores working-tree files
+git pull - fetches from then integrates changes into the current branch
+git push - uploads local refs to a remote repo
+git merge - merges another branch or commit into the current branch
+git rebase - reapplies commits from one branch onto another base to produce a linear history
+git fetch - downloads objects and refs from a remote but does not modity working tree or current branch
