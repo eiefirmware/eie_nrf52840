@@ -1,11 +1,17 @@
 {
-    "folders": [
-        {
-            "path": ".."
-        }
-    ],
-    "settings": {
-        "terminal.integrated.defaultProfile.windows": "Git Bash",
-        "python.terminal.activateEnvironment": true,
+  "folders": [
+    {
+      "path": ".."
     },
+    {
+      "path": "../../zephyr/boards/nordic/nrf52840dk"
+    },
+    {
+      "path": "../../zephyr/include"
+    }
+  ],
+  "settings": {
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "python.terminal.activateEnvironment": true
+  }
 }

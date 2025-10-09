@@ -169,7 +169,7 @@ The board device tree definition file describes how the microcontroller is conne
 We won't cover too much about the device tree but more information can be found in the Zephyr documentation.
 https://docs.zephyrproject.org/latest/build/dts/index.html
 
-Additionally Nordic's DevAcadamy introductory course on the nRF Connect SDK covers the device tree in more detail in link:https://academy.nordicsemi.com/courses/nrf-connect-sdk-fundamentals/lessons/lesson-3-elements-of-an-nrf-connect-sdk-application/topic/configuration-files/[Lesson 3].
+Additionally Nordic's DevAcadamy introductory course on the nRF Connect SDK covers the device tree in more detail in link:https://academy.nordicsemi.com/courses/nrf-connect-sdk-fundamentals/lessons/lesson-2-reading-buttons-and-controlling-leds/topic/devicetree/[Lesson 2].
 
 == Lesson
 
@@ -179,8 +179,9 @@ Additionally Nordic's DevAcadamy introductory course on the nRF Connect SDK cove
 +
 ----
 git fetch upstream
-git checkout embedded_primer
+git checkout upstream/embedded_primer
 ----
+. VSCode tips: In addition to opening your git repository in your editor (see `code ./.vscode/eie.code-workspace` command), you can add directories like the `../modules` and `../zephyr` diretories. This will help vscode look into the HAL layer for your definition of includes. You can then save this as a workspace for future use. (see `.vscode/eie.code-workspace`).
 . In the `app/` directory, create a new `src/` directory, as well as a new `main.c` file inside of `app/src/`. 
 . KConfig is a configuration system originally developed for linux kernel development.
 It allows developers to set configuration options for their application that are set at compile time.
