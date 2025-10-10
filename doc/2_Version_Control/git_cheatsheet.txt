@@ -1,0 +1,48 @@
+git init
+    Initialize a new Git repository in the current directory.
+
+git status
+    Show the current state of the working directory and staging area.
+
+git add
+    Stage changes (new, modified, or deleted files) for the next commit.
+
+git commit
+    Record the staged changes in the repository history.
+
+git branch
+    List, create, or delete branches in the repository.
+
+git checkout
+    Switch to a different branch or restore files to a previous state.
+
+git pull
+    Fetch changes from a remote repository and automatically merge them into the current branch.
+
+git push
+    Upload local commits to a remote repository.
+
+git merge
+    Combine changes from one branch into another (usually from a feature branch into main).
+
+git rebase
+    Reapply commits on top of another base branch, creating a cleaner commit history.
+
+git fetch
+    Download commits, files, and refs from a remote repository without merging them.
+
+git clone
+    Create a local copy of a remote repository.
+
+git log
+    Show a history of commits in the repository.
+
+git diff
+    Show differences between commits, branches, or the working directory and the last commit.
+
+git remote
+    Manage connections to remote repositories (list, add, or remove them).
+
+git stash
+    Temporarily save uncommitted changes so you can work on something else, then reapply them later.
+
