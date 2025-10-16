@@ -46,6 +46,12 @@ when u make changes locally and then want to push to github
 - git commit -m 'message'
 - git push
 
+when u make changes on github and want to sync to remote workspace
+- git pull
+
 git push --set-upstream origin <lesson#>
+	establishes a link between your local <lesson#> branch and the newly created remote <lesson#> branch on origin. This means that:
+Subsequent git pull commands on your local <lesson#> branch will automatically fetch and merge changes from origin/<lesson#>.
+Subsequent git push commands on your local <lesson#> branch will automatically push changes to origin/<lesson#>.
 
 - anytime im working with west and stuff, i need to use ... source .venv/Scripts/activate to get in my venv then go back in
