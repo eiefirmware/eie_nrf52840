@@ -43,6 +43,7 @@ git diff
 when u make changes locally and then want to push to github
 - git diff
 - git status
+- git add (and add selected files to staging area)
 - git commit -m 'message'
 - git push
 
