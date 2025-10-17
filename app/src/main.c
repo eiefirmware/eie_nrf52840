@@ -3,44 +3,47 @@
  */
 
 #include <zephyr/kernel.h>    //includes functions like k_msleep
-#include <zephyr/device.h>    //includes device struct in gpio_dt_spec
-#include <zephyr/drivers/gpio.h>  //includes all gpio_* functions and types
-#include <zephyr/sys/printk.h>    //includes printk function
-#include <inttypes.h>             //includes fixed sized int like uint8_t and sint32_t
 
-#define SLEEP_TIME_MS 1000
+#include <BTN.h>
+#include <LED.h>
 
-#define SW0_NODE DT_ALIAS(sw0)
-static const struct gpio_dt_spec button = GPIO_DT_SPEC_GET(SW0_NODE, gpios);
+#define SLEEP_TIME_MS 200 /*delay known as software debouncing, 
+                            sometimes the signal when clicking will bounce, causing
+                            the button to 'flicker', so adding a delay will prevent
+                            the system to see a double click and will check it once 
+                            before sleeping and then retries
+                            
+                            test for ideal*/
 
-static struct gpio_callback button_isr_data;
-
-void button_isr(const struct device *dev, struct gpio_callback *cb, uint32_t pins) {
-  printk("Button 0 pressed!\n");
-}
-
-int main(void) {
-  int ret;
-
-  if(!gpio_is_ready_dt(&button)) {
+int main(void) 
+{
+  int i;
+  
+  if (BTN_init() < 0) {
     return 0;
   }
 
-  ret = gpio_pin_configure_dt(&button, GPIO_INPUT);
-  if (0 > ret) {
+  if (LED_init() < 0) {
     return 0;
   }
 
-  ret = gpio_pin_interrupt_configure_dt(&button, GPIO_INT_EDGE_TO_ACTIVE);
-  if (0 > ret) {
-    return 0;
-  }  
+  while (1) {
 
-  gpio_init_callback(&button_isr_data, button_isr, BIT(button.pin));
-  gpio_add_callback(button.port, &button_isr_data);
+    for (i = 0; i < 16; i++) {
+      if (BTN_is_pressed(BTN0)) {
+        if (i % 2 == 1) {
+          LED_toggle(LED3);
+          printk("D column of truth table \n");
+        }
 
-  while(1) {
-
+        // if ( i == 2 || i == 3 || i == 6 || i == 7 || i == 10 || i == 11 || i == 14 || i == 15) {
+        //   LED_toggle(LED3);
+        //   printk("C column of truth table \n");
+        // }
+      }
+      k_msleep(SLEEP_TIME_MS);
+    }
+    
   }
-	return 0;
+  return 0;
 }
