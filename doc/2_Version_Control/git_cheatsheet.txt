@@ -1,0 +1,49 @@
+git commit
+Description: commits the changes to your current branch into a new commit bubble, basically saving your work "locally" on git
+
+git branch
+Description: creates a new branch where you can commit changes independent of other branches
+
+git checkout <branch_name>
+Description: Switch to the branch named <branch_name>, allowing you to use all git commands under the new branch. If you type git checkout -b <branch_name> it will create that branch and switch you to it in one step
+
+git pull
+Description: Will fetch all changes from the currently selected branch from its cloud version, then merge your current branch with the online repository origin/<branch_name>. If you do git pull --rebase it will pull your files and then rebase instead of merge. Also you can use git pull <remote> <branch>
+
+
+git push
+Pushes changes onto the remote repository.
+Using -u will create a remote repository on your github remote, for example git push -u origin will create a remote branch for your current branch. Consecutive git pushes dont need this, just the initialization for your remote repository.
+
+git merge <branch_name>
+merge current branch with branch <branch_name>
+
+git rebase <branch_name>
+Change the base of your current branch to the base of another branch <branch_name>
+
+git fetch
+fetch changes of your remote repository, changes are not stored locally but on your remote branch, to actually store the changes you do git merge origin/<branch_name>
+
+git add <directory>
+Description: moves changes from your working directory to the staging area (also called index), basically "include these files in next commit". Note directory starts where your current directory is.
+
+fun stuff: git add doc/ will add all files to staging area inside <current_directory>/doc/...
+
+git status
+Description: Answers the following questions
+What branch am I on?
+
+What changes have I made?
+
+Which changes are staged for commit?
+
+Which changes are unstaged or untracked?
+
+Is my branch ahead/behind the remote?
+
+
+git log
+Description: log of all the commit history of the repository, starting from most recent commit.
+
+git diff
+Description: will show you all the changes in your current repository. Shows stuff you have changed but not put into the staging area.

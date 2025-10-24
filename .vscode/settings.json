@@ -1,0 +1,7 @@
+{
+    "C_Cpp.default.compilerPath": "C:/msys64/ucrt64/bin/gcc.exe",
+    "C_Cpp.errorSquiggles": "disabled",
+    "files.associations": {
+        "btn.h": "c"
+    }
+}
