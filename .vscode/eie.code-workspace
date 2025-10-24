@@ -1,0 +1,13 @@
+{
+  "folders": [
+    {
+      "path": ".."
+    },
+    {
+      "path": "../../zephyr/boards/nordic/nrf52840dk"
+    },
+    {
+      "path": "../../zephyr/include"
+    }
+  ]
+}

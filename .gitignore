@@ -1,5 +1,4 @@
 # editors
-.vscode
 *.swp
 *~
 
@@ -14,3 +13,9 @@ __pycache__/
 
 # docs
 /doc/_build*
+
+# Ignore VScode files
+.vscode/*
+!.vscode/**/*.default.*
+!.vscode/extensions.json
+!.vscode/eie.code-workspace

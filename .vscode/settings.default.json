@@ -1,0 +1,6 @@
+{
+    "python.terminal.activateEnvironment": true,
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "python.defaultInterpreterPath": "${workspaceFolder}/../.venv",
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json"
+}

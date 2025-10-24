@@ -6,7 +6,7 @@
 
 This module describes the software installation required for the EIE Program. All software is freeware or Free Open Source Software.
 
-There are different install instructions for Windows, MacOS and Linux. Follow all instructions *Carefully* to make sure your setup works.
+There are different install instructions for Windows, MacOS and Linux. Follow all instructions _Carefully_ to make sure your setup works.
 
 ## Github setup
 
@@ -25,8 +25,13 @@ Start with this before proceeding to the OS setup
 
 1. Open the windows terminal application. If you do not have windows terminal installed get it from the [microsoft store](https://apps.microsoft.com/detail/9n0dx20hk701)
 2. Verify you have winget installed by running the command `winget --help` in the terminal. If installed help text for the Windows Package Manager should show up. If not installed install [winget](https://aka.ms/getwinget)
-3. Use Winget to install dependencies  `winget install Kitware.CMake Ninja-build.Ninja oss-winget.gperf python Git.Git oss-winget.dtc wget 7zip.7zip nrfutil`. You may need to add 7zip to the path
-4. Download the latest [jLink installer](https://www.segger.com/downloads/jlink/) and run through the setup process.
+3. Use Winget to install dependencies `winget install Kitware.CMake Ninja-build.Ninja oss-winget.gperf python Git.Git oss-winget.dtc wget 7zip.7zip nrfutil`.
+   a. You may need to add 7zip to the path
+   b. type 'python --version' which should say a number >13.0
+4. Download the latest [jLink installer](https://www.segger.com/downloads/jlink/)
+   a. start the setup process
+   b. make sure to check the "Install Legacy USB driver" checkbox
+   c. finish the setup process
 5. Open Git bash in the windows terminal
 6. Run `nrfutil install device`
 7. Change the current directory to your user directory: `cd /c/Users/<Your Username>`
