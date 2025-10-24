@@ -97,7 +97,7 @@ upstream https://github.com/eiefirmware/eie_nrf52840.git (push)`
          2. Don't worry about finding every possible argument the command can take, there are a HUGE amount, most of which you won't need for EiE. Just focus on what you know so far!
    9. Check that you see that a new file has been added in Git Bash by running `git status`
       1. You should see a new "untracked file" in red. This is because the Git repo hasn't been told to track this file yet, so let's do that.
-   10. Add this file to your "staging area" with `git add doc/2_Version_Control/git_cheatsheet.txt`
+   10. Add this file to your "staging area" with `git add . doc/2_Version_Control/git_cheatsheet.txt`
    11. See that the file you've added has been "staged" for a commit by running `git status` again
        1. You should see an "added file" in green. Any and all "staged" (green) changes are added to a commit when one is made, none of the "unstaged" changes (red).
    12. Commit your new cheatsheet to your repo with `git commit -m 'Add Git Cheatsheet'`
