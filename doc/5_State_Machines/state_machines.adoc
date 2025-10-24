@@ -1,0 +1,215 @@
+= State Machines
+:doctype: article
+:imagesdir: imgs
+:source-highlighter: highlight.js
+:toc:
+
+== Introduction
+
+In this lesson we are going to start to write more complex embedded programs.
+To help accomplish this we are going to cover a powerful design pattern used in many embedded systems: State machines.
+
+=== What is a State Machine
+
+A state machine is a way of organizing an event driven system.
+In a state machine we define the system states and how the system transitions between those states.
+
+We often use State transition diagrams to show the states and the transitions between them.
+For example the diagram below shows an example state machine for a traffic light with the criteria for each transition next to the transition arrow.
+
+image::traffic_light_sm.png[]
+
+=== C Language Features
+
+The following C language features will be needed for working with state machines in Zephyr
+
+==== Function pointers
+
+Before we discuss zephyr's state machine API we need to cover a core concept of the C language that is not covered in the intro to C courses.
+
+When a program is executing the CPU runs through the following 3 stages
+
+1. Fetch the next instruction from the system memory
+2. Decode the instruction
+3. Execute the instruction
+
+During the fetch stage the CPU uses a special register called the Program Counter (PC) which stores the address of the next instruction to be fetched.
+When a function is called the address the Program Counter holds is updated to the address of the first instruction of the function.
+Effectively all a function is is a pointer to the location in memory where the first instruction is.
+
+As a function is just a pointer we can store the corresponding address in a pointer variable and use it to call functions dynamically.
+The following listing declares `function_pointer` as a pointer to the function `f` and calls the function via the pointer
+[source,c]
+----
+void f(int);
+
+void (*function_pointer)(int) = f;
+function_pointer(10);
+----
+
+You can also use `typedef` to declare a function pointer type
+[source,c]
+----
+typedef void (*func_p_t)(int); // func_p_t is a pointer to a function returning void and taking int as an arg
+
+void f(int);
+func_p_t func_p = f;
+----
+
+We can use function pointers to dynamically call functions or pass functions as arguments to other methods.
+Function pointers that are passed into other APIs are often referred to as callbacks.
+[source,c]
+----
+typedef void (*func_p_t)(int);
+
+void f(int);
+void g(int);
+
+static const func_p_t my_func_array[] = {f, g};
+
+// Example of using function pointers to dynamically call functions
+for (int i=0; i < 2; i++)
+{
+    my_func_array[i](i); // Calls f(0) when i==0 and g(1) when i==1
+}
+
+// Function using a function pointer as a callback
+void foo(func_p_t callback)
+{
+    callback(100);
+}
+----
+
+The zephyr state machine API makes heavy use of function pointers.
+
+==== Static variables and functions
+
+Static variables and functions are heavily used in embedded systems.
+Static variables appear in 2 contexts, as variables within a function and as local variables within a file.
+
+In a function static variables maintain their value between function calls to the function
+[source, c]
+----
+int increment_return(void) {
+    static int x = 0;
+
+    return x++; // The return of increment_return will be incremented by 1 each call.
+                // If x was not declared static then increment_return would always return 0
+}
+----
+
+Static variables that are declared at file scope are only accessible within the file (also referred to as the translation unit) the variable is declared in.
+Similarly to static variables defined functions that are defined static are only available within the translation unit they are defined in.
+In general static function prototypes should be defined at the top of the corresponding source file rather than in a header file.
+
+==== Enum data types
+
+Enumerated types or enums are a user defined type that allow the developer to define and group integer constants.
+The listing below shows an example of a enum defined for colours.
+[source, c]
+----
+typedef enum colour {
+    RED,
+    GREEN,
+    BLUE
+} colour_t;
+
+colour_t colour = RED;
+----
+
+Enums are often used to define integer constants that are related to each other.
+We will use enums to define the different states of state machines.
+
+=== Zephyr State Machine API
+
+Zephyr provides a framework for creating state machines called the state machine framework.
+The documentation for the state machine framework is available at: https://docs.zephyrproject.org/latest/services/smf/index.html
+
+== Lesson
+
+. First we want to get git to a clean branch off of the tip of main.
+Run `git fetch upstream main` to fetch the latest changes from the upstream branch
+. Then run `git checkout main` to checkout your local copy of the main branch. If this step fails you likely have files from lesson 4 that are not commited. Commit those files to the lesson 4 branch before continuing
+. Next run `git pull upstream main` to get your main branch synced with the upstream branch.
+. At this point you can check you are in the correct spot either using a tool like the vs code Git Graph extension, gitk or by running the command `git log -1 --oneline` which will tell you that you are on the branch main and are also at the tip of upstream/main. Optionally at this point you can run `git push origin main` to syncronize the updates with your fork.
+. At this point you can create a new branch for lesson 5 by running `git checkout -b lesson-5`
+
+=== Create a simple state machine
+
+To start with we are going to create a simple state machine that blinks an LED.
+
+. The first step in creating a state machine is to define all the states and draw out the state diagram.
+The state diagram is drawn below
++
+image::led_sm.png[]
+This is a rather simple state machine with only 2 states, however as you start to work with more complicated machines this process becomes invaluable.
+. Next we need to enable the state machine framework in kconfig. Similarly to when we enabled the GPIO in lesson 3 we need to enable the state machine framework by adding the `CONFIG_SMF` to the `prj.conf` file in `app`. The `prj.conf` should look like the below afterwards.
++
+image::prj_edits.png[]
+. To organize our code better we are going to split the state machine into a separate C and H file. In the app/src folder create the files `my_state_machine.c` and `my_state_machine.h`. Similarly to when we initially created the main.c file we need to add the new source file to the `app/CMakeLists.txt` file. After adding the new source file the `CMakeLists.txt` file should have the following
++
+image::cmake_edits.png[]
+NOTE: As we have modified the cmake source files you may need to do a clean build which you can either do by deleting the `build` folder or adding the `-p always` option when you run `west build`
+. At this point you should stage your changes in git and commit
+. Now we will create 2 function prototypes in the header file we made.
++
+image::header_file.png[]
+. Next we want to include the header file in the `main.c` file and call the init and run methods defined in the header.
++
+image::main_c.png[]
+At this point the rest of the source code will be written within the new my_state_machine.c file
+. To start with in the my_state_machine.c file we will include the `zephyr/smf.h`, `LED.h`, and `my_state_machine.h` files and create the functions from the header which will be left blank for now.
++
+image::initial_src.png[]
+. At this point we need to create our states.
+Zephyr uses two data structures to define the states.
+The first is an enum with each of the states mapped to a value in the enum.
+Each state should be given a unique name that is descriptive of what the state is doing.
++
+The second structure is an array that defines the following functions for each state within the `smf_state` struct
+
+* entry: The entry function is called whenever the corresponding state is entered.
+* run: The corresponding states run function is called every time the state machine is updated.
+* exit: The exit function is called whenever the corresponding state is exited.
+
++
+Zephyr provides the `SMF_CREATE_STATE` macro to easily fill our the `smf_state struct`.
+If there is no action to be preformed on entry or exit they can be defined as NULL.
+The SMF_CREATE_STATE macro also takes two additional arguments for creating hierarchical state machines, but those are beyond the scope of this course and can be left as null.
+For the LED blink state machine we are making the enum and states array are defined below.
+In this case we will not need exit functions so they are left null.
+
++
+image::states_created.png[]
+. Zephyr uses a struct we define to keep track of the state of the state machine.
+We can also use this struct to define and keep track of variables needed by the state machine.
+For the LED state machine we will add a counter to this struct to keep track of when we need to change states.
++
+image::state_object_creation.png[]
+. At this point we have enough that we can fill out the init and run function we made earlier but left empty.
+In the init function we will use the zephyr `smf_set_initial` to set the initial state of the state machine and in the run function we will use the zephyr `smf_run_state` to call the run function of the current state.
+For the LED state machine these functions are defined below
++
+image::init_and_run_definition.png[]
+. Finally we can define the rest of the functions for our states.
+In the state entry functions we will set the LED either on or off corresponding to the on and off state respectively.
+In the state run function we will update the counter defined in the state machine structure and if the counter is above 500 change to the next state.
+To change states we will use the zephyr `smf_set_state` function.
+The run function must return the `smf_state_result` enum which for non hierarchical state machines should always return `SMF_EVENT_HANDLED`.
+The complete definitions for our state machine are given below
++
+image::state_function_definitions.png[]
+At this point you should be able to build and flash the board and see the LED blink at about 1 Hz.
+If you haven't already done so commit your changes to the lesson 5 branch
+
+
+== Exercise
+
+Complete the following exercises. Make sure to use git to track your changes.
+
+. Modify the state machine we created to use an exit function for each state rather than an entry function.
+. Create a state machine for the following state diagram
++
+image::exercise_sm.png[]
+For each state also print upon entering and exiting the state to the console
+* Rewrite the password lock exercise from lesson 4 using a state machine.

@@ -1,0 +1,29 @@
+@startuml
+S1 : East/West Light Green
+S1 : North/South Light Red
+
+S2 : East/West Light Yellow
+S2 : North/South Light Red
+
+S3 : East/West Light Red
+S3 : North/South Light Red
+
+S4 : East/West Light Red
+S4 : North/South Light Green
+
+S5 : East/West Light Red
+S5 : North/South Light Yellow
+
+S6 : East/West Light Red
+S6 : North/South Light Red
+
+[*] --> S1
+
+S1 --> S2 : Cars are waiting to travel North/South
+S2 --> S3 : 10 s have passed
+S3 -right-> S4 : 3 s have passed
+S4 -up-> S5 : Cars are waiting to travel East/West
+S5 -up-> S6 : 10 s have passed
+S6 -left-> S1 : 3 s have passed
+
+@enduml
