@@ -1,0 +1,9 @@
+@startuml
+S0 : LED0 is on
+S1 : LED0 is off
+
+[*] -> S0
+
+S0 -> S1 : 1 s passed
+S1 -> S0 : 1 s passed
+@enduml

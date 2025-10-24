@@ -9,10 +9,9 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(app LANGUAGES C)
 
-target_sources(app PRIVATE src/main.c)
-target_sources(app PRIVATE ../drivers/LED/led.c)
-target_sources(app PRIVATE ../drivers/BTN/btn.c)
+zephyr_include_directories(src)
 
+<<<<<<< HEAD
 target_include_directories(app PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../drivers
 )
@@ -22,3 +21,6 @@ target_include_directories(app PRIVATE
 target_include_directories(app PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../drivers/LED
 )
+=======
+target_sources(app PRIVATE src/main.c)
+>>>>>>> 411e7ce96d2adce819f520352c905a74509f0652
