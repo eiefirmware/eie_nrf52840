@@ -8,3 +8,4 @@
 # This is needed so that custom driver classes using system calls are taken into
 # account
 
+add_subdirectory(drivers)

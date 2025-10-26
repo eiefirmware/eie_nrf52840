@@ -1,0 +1,24 @@
+@startuml
+S0 : All LEDs off
+S1 : LED 1 blink at 4 Hz
+S2 : LED 1 and 3 on
+S2 : LED 2 and 4 off
+S3 : LED 1 and 3 off
+S3 : LED 2 and 4 on
+S4 : All LEDs blink at 16 Hz
+
+[*] -> S0
+
+S0 -> S1 : Button 1 pressed
+
+S1 -down-> S2 : Button 2 pressed
+S1 -up-> S4 : Button 3 pressed
+
+S2 -left-> S3 : 1 second passed
+S3 -> S2 : 2 seconds passed
+
+S1 -> S0 : Button 4 pressed
+S2 -> S0 : Button 4 pressed
+S3 -up-> S0 : Button 4 pressed
+S4 -> S0 : Button 4 pressed
+@enduml
