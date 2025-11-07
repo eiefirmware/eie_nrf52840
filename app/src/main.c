@@ -5,26 +5,23 @@
 #include <inttypes.h>
 
 #include <zephyr/kernel.h>
-#include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
-#include <zephyr/sys/printk.h>
 
-#include "BTN.h"
-#include "LED.h"
-
-#define SLEEP_MS 1
+#define LEDO_NODE DT_ALIAS(led0)
 
 int main(void) {
 
-  if (0 > BTN_init()) {
-    return 0;
-  }
-  if (0 > LED_init()) {
-    return 0;
+  if(!pgio_is_ready_dt(&led0)) {
+    return -1;
   }
 
+  ret = gpio_pin_configure_dt(&led0, GPIO_OUTPUT_ACTIVE);
+  if(ret < 0) {
+    return ret;
+  }
+  
   while(1) {
-    k_msleep(SLEEP_MS);
+  
   }
 	return 0;
 }
