@@ -15,10 +15,15 @@ Header to define button module logic
 ---------------------------------------------------------------------------- */
 #define BTN_DEBOUNCE_MS   20
 
-#define BTN0_NODE   DT_ALIAS(sw0)
-#define BTN1_NODE   DT_ALIAS(sw1)
-#define BTN2_NODE   DT_ALIAS(sw2)
-#define BTN3_NODE   DT_ALIAS(sw3)
+/* ----------------------------------------------------------------------------
+                                  Macro Helpers
+---------------------------------------------------------------------------- */
+#define BTN0_NODE             DT_ALIAS(sw0)
+#define BTN1_NODE             DT_ALIAS(sw1)
+#define BTN2_NODE             DT_ALIAS(sw2)
+#define BTN3_NODE             DT_ALIAS(sw3)
+
+#define IS_INVALID_BTN(btn)   (btn >= NUM_BTNS || btn < 0)
 
 /* ----------------------------------------------------------------------------
                                     Types
@@ -129,7 +134,7 @@ int BTN_init() {
  * @return true if btn is being pressed
  */
 bool BTN_is_pressed(btn_id btn) {
-  if (btn >= NUM_BTNS || btn < 0) {
+  if (IS_INVALID_BTN(btn)) {
     return false;
   } else if (0 < gpio_pin_get_dt(&_btns[btn]->spec)) {
     return true;
@@ -147,9 +152,13 @@ bool BTN_is_pressed(btn_id btn) {
  * @return true if btn has been pressed
  */
 bool BTN_check_clear_pressed(btn_id btn) {
-  bool was_pressed = _btns[btn]->pressed;
-  _btns[btn]->pressed = false;
-  return was_pressed;
+  if (IS_INVALID_BTN(btn)) {
+    return false;
+  } else {
+    bool was_pressed = _btns[btn]->pressed;
+    _btns[btn]->pressed = false;
+    return was_pressed;
+  }
 }
 
 /**
@@ -160,7 +169,7 @@ bool BTN_check_clear_pressed(btn_id btn) {
  * @return true if btn has been pressed
  */
 bool BTN_check_pressed(btn_id btn) {
-  if (btn >= NUM_BTNS || btn < 0) {
+  if (IS_INVALID_BTN(btn)) {
     return false;
   } else {
     return _btns[btn]->pressed;
@@ -173,6 +182,10 @@ bool BTN_check_pressed(btn_id btn) {
  * @param [in] btn Which button to clear
  */
 void BTN_clear_pressed(btn_id btn) {
-  _btns[btn]->pressed = false;
-  return;
+  if (IS_INVALID_BTN(btn)) {
+    return;
+  } else {
+    _btns[btn]->pressed = false;
+    return;
+  }
 }

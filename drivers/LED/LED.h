@@ -5,6 +5,8 @@ Header to define led interface
 #ifndef LED_H
 #define LED_H
 
+#include "stdint.h"
+
 /* ----------------------------------------------------------------------------
                                     TYPES
 ---------------------------------------------------------------------------- */
@@ -37,6 +39,8 @@ int LED_init();
 int LED_toggle(led_id led);
 
 int LED_set(led_id led, led_state new_state);
+
+int LED_pwm(led_id led, uint8_t duty_cycle);
 
 void LED_blink(led_id led, led_frequency frequency);
 
