@@ -1,0 +1,113 @@
+1. git commit
+
+What it does:
+Saves (records) the staged changes in your local repository as a new commit.
+Common arguments:
+
+-m "message" → Adds a commit message directly from the command line.
+
+-a → Automatically stages all modified, tracked files before committing.
+
+--amend → Modifies the most recent commit (e.g., to change the message or add forgotten changes).
+Changes with arguments:
+Yes — with --amend, it edits the previous commit instead of creating a new one.
+
+2. git branch
+
+What it does:
+Lists, creates, or deletes branches.
+Common arguments:
+
+(no arguments) → Lists all local branches.
+
+<branch_name> → Creates a new branch with the given name.
+
+-d <branch_name> → Deletes a branch.
+
+-m <old_name> <new_name> → Renames a branch.
+Changes with arguments:
+Yes — behavior changes depending on arguments: listing, creating, deleting, or renaming branches.
+
+3. git checkout
+
+What it does:
+Switches between branches or restores files.
+Common arguments:
+
+<branch_name> → Switches to an existing branch.
+
+-b <branch_name> → Creates and switches to a new branch.
+
+<file_name> → Restores a file to its last committed version.
+Changes with arguments:
+Yes — it can either change branches or revert files depending on what arguments you provide.
+
+4. git pull
+
+What it does:
+Fetches changes from a remote repository and merges them into the current branch.
+Common arguments:
+
+<remote> (e.g., origin) → Specifies which remote to pull from.
+
+<branch> → Specifies which branch to pull.
+
+--rebase → Rebase instead of merge after fetching.
+Changes with arguments:
+Mostly the same core function (update your branch), but using --rebase changes how history is applied.
+
+5. git push
+
+What it does:
+Uploads your local commits to a remote repository.
+Common arguments:
+
+<remote> <branch> → Pushes a specific branch (e.g., git push origin main).
+
+-u → Sets the upstream branch for future pushes.
+
+--force or -f → Forces the push (overwrites remote history — use with caution).
+Changes with arguments:
+Slightly — you can define which branch/remote to push to, or overwrite history with --force.
+
+6. git merge
+
+What it does:
+Combines changes from another branch into the current branch.
+Common arguments:
+
+<branch_name> → Merges the specified branch into the current one.
+
+--no-ff → Forces a merge commit, even if a fast-forward merge is possible.
+
+--abort → Cancels a merge in progress.
+Changes with arguments:
+No major function change — always merges, but options modify how it merges.
+
+7. git rebase
+
+What it does:
+Moves or reapplies commits on top of another base commit or branch.
+Common arguments:
+
+<branch_name> → Rebase current branch onto another branch.
+
+-i (interactive) → Lets you edit, squash, or reorder commits.
+
+--continue, --abort → Manage ongoing rebase.
+Changes with arguments:
+Yes — interactive mode (-i) significantly changes its use (manual editing of commits).
+
+8. git fetch
+
+What it does:
+Downloads commits, branches, and tags from a remote repository without merging them into your local branch.
+Common arguments:
+
+<remote> → Fetch from a specific remote.
+
+<remote> <branch> → Fetch a specific branch.
+
+--all → Fetch from all remotes.
+Changes with arguments:
+No — still retrieves updates, but scope (which remote/branch) changes.
