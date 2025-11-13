@@ -17,6 +17,7 @@ git pull
 
 git push
  - uploads commit to remote repo
+ - -u sets a default branch ? idk
 
 git merge
  - combines arg branch history into current branch
@@ -26,3 +27,12 @@ git rebase
 
 git fetch
  - downloads everything from remote repo but doesn't merge anything
+
+git add
+ - adds file args for next commit.. something something staging area
+
+git status
+ - shows what's been staged/modified/untracked in the staging area (for next commit)
+
+git log
+ - shows commit history of repo
