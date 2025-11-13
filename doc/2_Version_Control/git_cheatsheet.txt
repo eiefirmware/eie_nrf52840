@@ -1,5 +1,6 @@
 git commit
  - saves changes to local repo
+ - -m 'some bs idk' arg lets you add a message
 
 git branch
  - edits branches
