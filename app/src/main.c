@@ -34,15 +34,10 @@ int main(void) {
 
 
     while (1) {
-        doubletime++;
-        if (doubletime % 2) {
-            for (int i = 1; i < 4; i++) {
+        for (int i = 0; i < 4; i++) {
                 gpio_pin_toggle_dt(&leds[i]);
+                k_msleep(250);
             }
-        }
-
-        gpio_pin_toggle_dt(&leds[0]);
-        k_msleep(500);
     }
 
     return 0;
