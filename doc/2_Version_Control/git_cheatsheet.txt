@@ -1,0 +1,27 @@
+git commit
+ - saves changes to local repo
+
+git branch
+ - edits branches
+ - adding a branch name creates a branch with that name
+
+git checkout 
+ - switches current branch
+ - with a branch name, it moves to that branch
+ - or with -b branch name, it creates a branch with that name and moves to it
+
+git pull
+ - fetches changes from remote & merges with current branch
+ - --rebase rebases rather than merging 
+
+git push
+ - uploads commit to remote repo
+
+git merge
+ - combines arg branch history into current branch
+
+git rebase
+ - re-applies commits to arg branch rewrites history (unlike merge which combines... ig?)
+
+git fetch
+ - downloads everything from remote repo but doesn't merge anything
