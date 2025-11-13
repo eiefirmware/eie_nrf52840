@@ -16,7 +16,7 @@ static const struct gpio_dt_spec led2 = GPIO_DT_SPEC_GET(LED2_NODE, gpios);
 static const struct gpio_dt_spec led3 = GPIO_DT_SPEC_GET(LED3_NODE, gpios);
 
 int main(void) {
-    int ret;
+    int ret, doubletime = 0;
 
     const struct gpio_dt_spec leds[] = {led0, led1, led2, led3};
 
@@ -34,11 +34,15 @@ int main(void) {
 
 
     while (1) {
-        for (int i = 0; i < 4; i++) {
-            gpio_pin_toggle_dt(&leds[i]);
+        doubletime++;
+        if (doubletime % 2) {
+            for (int i = 1; i < 4; i++) {
+                gpio_pin_toggle_dt(&leds[i]);
+            }
         }
 
-        k_msleep(1000);
+        gpio_pin_toggle_dt(&leds[0]);
+        k_msleep(500);
     }
 
     return 0;
