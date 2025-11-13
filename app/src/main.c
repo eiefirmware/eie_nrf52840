@@ -16,7 +16,7 @@ static const struct gpio_dt_spec led2 = GPIO_DT_SPEC_GET(LED2_NODE, gpios);
 static const struct gpio_dt_spec led3 = GPIO_DT_SPEC_GET(LED3_NODE, gpios);
 
 int main(void) {
-    int ret, doubletime = 0;
+    int ret;
 
     const struct gpio_dt_spec leds[] = {led0, led1, led2, led3};
 
