@@ -3,6 +3,7 @@
  */
 
 #include <zephyr/smf.h>
+#include <zephyr/sys/printk.h>
 #include "LED.h"
 #include "my_state_machine.h"
 
@@ -44,6 +45,7 @@ static void set_all_leds(bool state) {
  * State S0 - All LEDs OFF
  *---------------------------------------------------------*/
 static void s0_entry(void *o) {
+    printk("Entering S0: All LEDs OFF\n");
     set_all_leds(false);
     sm_object.count = 0;
 }
@@ -63,10 +65,15 @@ static enum smf_state_result s0_run(void *o) {
     return SMF_EVENT_HANDLED;
 }
 
+static void s0_exit(void *o) {
+    printk("Exiting S0: All LEDs OFF\n");
+}
+
 /*-------------------------------------------------------
  * State S1 - LED 1 Blink at 4 Hz
  *---------------------------------------------------------*/
 static void s1_entry(void *o) {
+    printk("Entering S1: LED 1 Blink at 4 Hz\n");
     sm_object.count = 0;
     sm_object.led_state = false;
     set_all_leds(false);
@@ -97,10 +104,15 @@ static enum smf_state_result s1_run(void *o) {
     return SMF_EVENT_HANDLED;
 }
 
+static void s1_exit(void *o) {
+    printk("Exiting S1: LED 1 Blink at 4 Hz\n");
+}
+
 /*-------------------------------------------------------
  * State S2 - LED 1 and 3 ON, LED 2 and 4 OFF
  *---------------------------------------------------------*/
 static void s2_entry(void *o) {
+    printk("Entering S2: LED 1 and 3 ON, LED 2 and 4 OFF\n");
     LED_set(LED0, LED_ON);   // LED 1 on
     LED_set(LED1, LED_OFF);  // LED 2 off
     LED_set(LED2, LED_ON);   // LED 3 on
@@ -126,10 +138,15 @@ static enum smf_state_result s2_run(void *o) {
     return SMF_EVENT_HANDLED;
 }
 
+static void s2_exit(void *o) {
+    printk("Exiting S2: LED 1 and 3 ON, LED 2 and 4 OFF\n");
+}
+
 /*-------------------------------------------------------
  * State S3 - LED 1 and 3 OFF, LED 2 and 4 ON
  *---------------------------------------------------------*/
 static void s3_entry(void *o) {
+    printk("Entering S3: LED 1 and 3 OFF, LED 2 and 4 ON\n");
     LED_set(LED0, LED_OFF);  // LED 1 off
     LED_set(LED1, LED_ON);   // LED 2 on
     LED_set(LED2, LED_OFF);  // LED 3 off
@@ -155,10 +172,15 @@ static enum smf_state_result s3_run(void *o) {
     return SMF_EVENT_HANDLED;
 }
 
+static void s3_exit(void *o) {
+    printk("Exiting S3: LED 1 and 3 OFF, LED 2 and 4 ON\n");
+}
+
 /*-------------------------------------------------------
  * State S4 - All LEDs Blink at 16 Hz
  *---------------------------------------------------------*/
 static void s4_entry(void *o) {
+    printk("Entering S4: All LEDs Blink at 16 Hz\n");
     sm_object.count = 0;
     sm_object.led_state = false;
     set_all_leds(false);
@@ -189,15 +211,19 @@ static enum smf_state_result s4_run(void *o) {
     return SMF_EVENT_HANDLED;
 }
 
+static void s4_exit(void *o) {
+    printk("Exiting S4: All LEDs Blink at 16 Hz\n");
+}
+
 /*-------------------------------------------------------
  * State Table
  *---------------------------------------------------------*/
 static const struct smf_state states[] = {
-    [S0_ALL_OFF]    = SMF_CREATE_STATE(s0_entry, s0_run, NULL, NULL, NULL),
-    [S1_LED1_BLINK] = SMF_CREATE_STATE(s1_entry, s1_run, NULL, NULL, NULL),
-    [S2_LED13_ON]   = SMF_CREATE_STATE(s2_entry, s2_run, NULL, NULL, NULL),
-    [S3_LED24_ON]   = SMF_CREATE_STATE(s3_entry, s3_run, NULL, NULL, NULL),
-    [S4_ALL_BLINK]  = SMF_CREATE_STATE(s4_entry, s4_run, NULL, NULL, NULL),
+    [S0_ALL_OFF]    = SMF_CREATE_STATE(s0_entry, s0_run, s0_exit, NULL, NULL),
+    [S1_LED1_BLINK] = SMF_CREATE_STATE(s1_entry, s1_run, s1_exit, NULL, NULL),
+    [S2_LED13_ON]   = SMF_CREATE_STATE(s2_entry, s2_run, s2_exit, NULL, NULL),
+    [S3_LED24_ON]   = SMF_CREATE_STATE(s3_entry, s3_run, s3_exit, NULL, NULL),
+    [S4_ALL_BLINK]  = SMF_CREATE_STATE(s4_entry, s4_run, s4_exit, NULL, NULL),
 };
 
 /*-------------------------------------------------------
@@ -212,6 +238,7 @@ void state_machine_init(void) {
         sm_object.button_pressed[i] = false;
     }
     
+    printk("Initializing State Machine\n");
     // Start in S0 (all LEDs off)
     smf_set_initial(SMF_CTX(&sm_object), &states[S0_ALL_OFF]);
 }
