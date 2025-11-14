@@ -23,8 +23,10 @@ typedef struct {
 /*-------------------------------------------------------
  * Local Variables
  *---------------------------------------------------------*/
-// FIXED: Declare the actual state object variable
 static led_state_object_t led_state_object;
+
+// FIXED: Forward declaration of led_states array
+static const struct smf_state led_states[];
 
 /*-------------------------------------------------------
  * State Functions
@@ -44,7 +46,6 @@ static enum smf_state_result led_on_state_run(void *o) {
     return SMF_EVENT_HANDLED;
 }
 
-// FIXED: Changed void*0 to void*o
 static void led_off_state_entry(void *o) { 
     LED_set(LED0, LED_OFF);
 }
@@ -63,10 +64,11 @@ static enum smf_state_result led_off_state_run(void *o) {
 /*-------------------------------------------------------
  * State Table
  *---------------------------------------------------------*/
-// FIXED: Added semicolon at the end
+// SMF_CREATE_STATE  requires 5 arguments:
+// (entry, run, exit, parent, initial)
 static const struct smf_state led_states[] = {
-    [LED_ON_STATE] = SMF_CREATE_STATE(led_on_state_entry, led_on_state_run, NULL),
-    [LED_OFF_STATE] = SMF_CREATE_STATE(led_off_state_entry, led_off_state_run, NULL),
+    [LED_ON_STATE] = SMF_CREATE_STATE(led_on_state_entry, led_on_state_run, NULL, NULL, NULL),
+    [LED_OFF_STATE] = SMF_CREATE_STATE(led_off_state_entry, led_off_state_run, NULL, NULL, NULL),
 };
 
 /*-------------------------------------------------------
