@@ -7,7 +7,7 @@
 
 #include <stdbool.h>
 
-// Button definitions matching hardware
+// Button definitions matching your hardware
 typedef enum {
     BUTTON_1 = 0,
     BUTTON_2 = 1,
