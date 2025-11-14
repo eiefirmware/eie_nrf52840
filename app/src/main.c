@@ -6,6 +6,9 @@
 #include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/sys/printk.h>
+#include <inttypes.h>
+#include "LED.h"
+#include "BTN.h"
 #include "password_state_machine.h"
 
 #define SLEEP_TIME_MS 50
@@ -30,6 +33,14 @@ static bool btn3_was_pressed = false;
 int main(void) {
     int ret;
 
+    // Initialize LED and BTN drivers
+    if (0 > LED_init()) {
+        return 0;
+    }
+    if (0 > BTN_init()) {
+        return 0;
+    }
+
     // Check if buttons are ready
     if(!gpio_is_ready_dt(&button0) || !gpio_is_ready_dt(&button1) ||
        !gpio_is_ready_dt(&button2) || !gpio_is_ready_dt(&button3)) {
@@ -50,8 +61,14 @@ int main(void) {
     ret = gpio_pin_configure_dt(&button3, GPIO_INPUT);
     if(ret < 0) return ret;
 
+    // PWM brightness control variable
+    uint8_t current_duty_cycle = 0;
+    
+    // Set initial LED brightness
+    LED_pwm(LED0, current_duty_cycle);
+
     // Initialize password state machine
-    password_state_machine_init();  //
+    password_state_machine_init();
 
     // Main loop
     while(1) {
@@ -61,15 +78,18 @@ int main(void) {
         int btn2_state = gpio_pin_get_dt(&button2);
         int btn3_state = gpio_pin_get_dt(&button3);
 
-        // Button 0 (BTN1 on board)
+        // Button 0 (BTN1 on board) - PWM Brightness Control
         if(btn0_state > 0 && !btn0_was_pressed) {
-            password_state_machine_button_press(PASSWORD_BUTTON_0); 
+            // Increment duty cycle by 10%, wrap at 100%
+            current_duty_cycle = (current_duty_cycle >= 100) ? 0 : (current_duty_cycle + 10);
+            printk("Setting LED0 to %d%% brightness.\n", current_duty_cycle);
+            LED_pwm(LED0, current_duty_cycle);
             btn0_was_pressed = true;
         } else if(btn0_state == 0) {
             btn0_was_pressed = false;
         }
 
-        // Button 1 (BTN2 on board)
+        // Button 1 (BTN2 on board) - Password input
         if(btn1_state > 0 && !btn1_was_pressed) {
             password_state_machine_button_press(PASSWORD_BUTTON_1); 
             btn1_was_pressed = true;
@@ -77,7 +97,7 @@ int main(void) {
             btn1_was_pressed = false;
         }
 
-        // Button 2 (BTN3 on board)
+        // Button 2 (BTN3 on board) - Password input
         if(btn2_state > 0 && !btn2_was_pressed) {
             password_state_machine_button_press(PASSWORD_BUTTON_2);  
             btn2_was_pressed = true;
@@ -85,7 +105,7 @@ int main(void) {
             btn2_was_pressed = false;
         }
 
-        // Button 3 (BTN4 on board - Enter button)
+        // Button 3 (BTN4 on board) - Password Enter button
         if(btn3_state > 0 && !btn3_was_pressed) {
             password_state_machine_button_press(PASSWORD_BUTTON_3); 
             btn3_was_pressed = true;
