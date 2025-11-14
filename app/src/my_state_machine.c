@@ -25,14 +25,16 @@ typedef struct {
  *---------------------------------------------------------*/
 static led_state_object_t led_state_object;
 
-// FIXED: Forward declaration of led_states array
+// Forward declaration of led_states array
 static const struct smf_state led_states[];
 
 /*-------------------------------------------------------
  * State Functions
  *---------------------------------------------------------*/
-static void led_on_state_entry(void *o) {
-    LED_set(LED0, LED_ON);
+
+// Exit function for LED_ON state - turns LED OFF when leaving this state
+static void led_on_state_exit(void *o) {
+    LED_set(LED0, LED_OFF);
 }
 
 static enum smf_state_result led_on_state_run(void *o) { 
@@ -46,8 +48,9 @@ static enum smf_state_result led_on_state_run(void *o) {
     return SMF_EVENT_HANDLED;
 }
 
-static void led_off_state_entry(void *o) { 
-    LED_set(LED0, LED_OFF);
+// Exit function for LED_OFF state - turns LED ON when leaving this state
+static void led_off_state_exit(void *o) { 
+    LED_set(LED0, LED_ON);
 }
 
 static enum smf_state_result led_off_state_run(void *o) {
@@ -64,11 +67,11 @@ static enum smf_state_result led_off_state_run(void *o) {
 /*-------------------------------------------------------
  * State Table
  *---------------------------------------------------------*/
-// SMF_CREATE_STATE  requires 5 arguments:
-// (entry, run, exit, parent, initial)
+// SMF_CREATE_STATE(entry, run, exit, parent, initial)
+// Now using NULL for entry and providing exit functions
 static const struct smf_state led_states[] = {
-    [LED_ON_STATE] = SMF_CREATE_STATE(led_on_state_entry, led_on_state_run, NULL, NULL, NULL),
-    [LED_OFF_STATE] = SMF_CREATE_STATE(led_off_state_entry, led_off_state_run, NULL, NULL, NULL),
+    [LED_ON_STATE] = SMF_CREATE_STATE(NULL, led_on_state_run, led_on_state_exit, NULL, NULL),
+    [LED_OFF_STATE] = SMF_CREATE_STATE(NULL, led_off_state_run, led_off_state_exit, NULL, NULL),
 };
 
 /*-------------------------------------------------------
@@ -76,7 +79,8 @@ static const struct smf_state led_states[] = {
  *---------------------------------------------------------*/
 void state_machine_init(void) { 
     led_state_object.count = 0;
-    smf_set_initial(SMF_CTX(&led_state_object), &led_states[LED_ON_STATE]);
+    // Start in LED_OFF state, so the exit function will turn LED ON
+    smf_set_initial(SMF_CTX(&led_state_object), &led_states[LED_OFF_STATE]);
 }
 
 int state_machine_run(void) { 
