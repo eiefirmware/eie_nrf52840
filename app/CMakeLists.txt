@@ -12,7 +12,7 @@ project(app LANGUAGES C)
 zephyr_include_directories(src)
 
 target_sources(app PRIVATE src/main.c)
-target_sources(app PRIVATE src/password_state_machine.c)
+target_sources(app PRIVATE src/app_state_machine.c)
 target_sources(app PRIVATE ../drivers/LED/led.c)
 target_sources(app PRIVATE ../drivers/BTN/btn.c)
 
