@@ -79,7 +79,7 @@ const char *TAMA_HUNGRY = "(つ╥﹏╥)つ  FEED ME!";
 
 const char *TAMA_SAD = "(｡ᵕ ◞ _◟)  Need some love...";
 
-const char *TAMA_SICK = "\"( – ⌓ – )  💊 NEED MEDICINE!";
+const char *TAMA_SICK = "\"( - ⌓ - )  💊 NEED MEDICINE!";
 
 const char *TAMA_SLEEPING = "⋆｡˚ ☁︎ᶻ 𝗓 𐰁 ˚｡⋆｡˚☽˚｡⋆ᶻ 𝗓 𐰁";
 
