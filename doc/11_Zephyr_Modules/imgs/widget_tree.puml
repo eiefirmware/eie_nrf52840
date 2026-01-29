@@ -1,0 +1,21 @@
+@startuml
+object screen
+object "Button 1" as B1
+object "Button 2" as B2
+object "Button 3" as B3
+object "Button 4" as B4
+object "Label 1" as L1
+object "Label 2" as L2
+object "Label 3" as L3
+object "Label 4" as L4
+
+screen *-- B1
+screen *-- B2
+screen *-- B3
+screen *-- B4
+
+B1 *-- L1
+B2 *-- L2
+B3 *-- L3
+B4 *-- L4
+@enduml

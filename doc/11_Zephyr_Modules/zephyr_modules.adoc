@@ -1,0 +1,167 @@
+= Zephyr Modules
+:doctype: article
+:imagesdir: imgs
+:toc:
+:xrefstyle: short
+:source-highlighter: highlight.js
+
+== Introduction
+
+Throughout this course we have primarily been depending on the features provided by the zephyr RTOS.
+Zephyr has integrated several external projects, referred to as zephyr modules, to provide functionality that zephyr shouldn't recreate.
+Some examples of these modules include
+
+* Silicon Vender HALs
+* Cryptography libraries
+* File Systems
+* Communication Libraries
+
+We have technically already used two modules in this course from the beginning;
+These modules are the Nordic HAL and the ARM Common Microcontroller Software Interface Standard (CMSIS) which are both necessary to compile zephyr for the nRF52840.
+
+Today we will look at the Light and Versatile Graphics Library, which provides a convenient framework for making UIs designed for embedded systems.
+
+== Lesson
+
+We will be using the Light and Versatile Graphics Library (LVGL) to give us easier control over the LCD we started using last lesson.
+Zephyr contains support for LVGL and has it integrated to use the Zephyr display drivers which will talk to the LCD shield via SPI and I2C.
+It is strongly recommended to familiarize yourself with the LVGL documentation: https://docs.lvgl.io/9.4/index.html
+
+
+=== Project Configuration
+To use LVGL first we need to add it to the west manifest file to get west to clone it.
+Add the lvgl module to the west allowlist in the west.yml file in the root project directory and run `west update` in your terminal to initialize the modules.
+The terminal output should say that it is updating lvgl.
+[]
+image::west_manifest.png[]
+
+Next we need to add the configurations to turn on the zephyr display driver and LVGL to the prj.conf file.
+There is a separate config for the display driver and LVGL as LVGL sits on top of the display driver and the display driver itself can be used independently.
+The final 2 configs added are configuring the amount of RAM the LVGL module can use for dynamic memory allocation and the size of main stack the application will use.
+[]
+image::prj_conf.png[]
+
+At this point we can build.
+If you recall from last lesson when setting up SPI we had to add extra configurations to the board overlay file to describe the screen.
+We need to do the same thing today, however Zephyr provides a built in overlay for the LCD shield.
+We can access this overlay using the `--shield` flag when building.
+Use the command `west build -b nrf52840dk/nrf52840 --shield=adafruit_2_8_tft_touch_v2 app` to build the application and include the shield definition.
+After running this command once using just `west build` should be sufficient to rebuild, unless a clean build is performed.
+
+NOTE:: LVGL significantly increases the build size of our project.
+As such it is recommended not to use the pristine build flag `-p always` unless needed.
+
+=== A basic Hello World!
+Now lets write a very basic hello world program that writes Hello World to the screen.
+First we need to include the necessary headers, and setup the zephyr device
+[]
+image::main_setup.png[]
+
+Then we can create a lv label and assign the text `"Hello World!"` to that object.
+After creating our label we can turn disable display blanking and call the `lv_timer_handler` method to refresh the screen.
+[]
+image::main_hello_world.png[]
+At this point if you build and flash you should see the text `Hello World!` appear in the top left of your screen.
+
+Compare this to what we did last lesson to draw a single square on the screen you can see hopefully how much easier this is.
+Try using the LV documentation to see if you can change the text color or position.
+
+=== Buttons
+We will now create 4 button objects on the screen to toggle each of the LEDs.
+LVGL uses a tree data structure to create and store objects.
+For the button example we will create 4 buttons that are children of the screen.
+Then we will create a label that is a child of each button.
+[]
+image::widget_tree.png[]
+
+This can be done with a for loop easily.
+[]
+image::main_button_creation.png[]
+At this point if we build and flash we will see the 4 buttons created, but nothing will happen when we press on them.
+[]
+image::button_results.jpg[width=50%]
+
+==== The Event Callback
+To make the button do something we will use the `lv_obj_add_event_cb` method.
+This method allows us to call a function when a event happens to a LV object.
+In our case we will call a handler to toggle an LED when the `LV_EVENT_CLICKED` event occurs.
+The `lv_obj_add_event_cb` takes 4 parameters:
+
+* The object the event is associated with
+* A callback function
+* A LV Event code to specify what event occurred (See https://docs.lvgl.io/9.4/details/common-widget-features/events.html#events-codes[Event Codes] for more details)
+* User data passed to the callback function via a void pointer.
+
+We can use the user data field to pass which LED we want the callback method to turn on.
+
+Before we use the user data field it is important to understand how it works as it is dangerous.
+Internal to the lv add event callback method, the user data pointer is just directly copied to an internal pointer to the lv event handler.
+This means if the pointer becomes invalid before the event occurs we will have undefined behaviour.
+
+For example consider the following function adding an event handler
+[source, c]
+----
+static void lv_callback(lv_event_t *e);
+
+void create_event_handler() {
+  lv_obj_t * ui_btn = lv_button_create(lv_screen_active());
+
+  int my_data = 42;
+  lv_obj_add_event_cb(ui_btn, lv_callback, LV_EVENT_CLICKED, &my_data);
+}
+----
+Once the function create_event_handler has exited the integer `my_data` will be out of scope and the pointer passed as user data to the event callback will be invalid!
+
+There is a few ways we can solve this. First we could use a static variable to pass in the data as a static variable is allocated in static memory and not on the stack. Alternatively we could use dynamic memory allocated by malloc or a similar utility but then we need to worry about properly freeing the memory when we are done using it.
+
+What would be the best solution is to have the memory allocated for the user data to be tied to the button object itself.
+For EIE a extension of the LV object type was created that does just this.
+It allows us to add a child object to our button to store the data we need for the callback.
+If or when the button is deleted the LVGL module will also handle freeing any memory we have allocated for the user data.
+
+To setup this callback first we will create the callback function.
+We will be passing the entire data object as the user data to the add callback method.
+Within the callback we use the `lv_event_get_user_data` method to get the data object.
+Then we can use the `lv_data_obj_get_data_ptr` to retrieve our data from the data object, which in this case is the LED ID we can use to toggle the LED.
+[]
+image::button_callback.png[]
+
+Next back in the for loop in main, we can create a new data object and assign the data within it to the LED id we want to toggle.
+Then we can add the event callback to the LED and pas the data object as the user data.
+[]
+image::main_button_event.png[]
+At this point if we build and flash the buttons will turn on the 4 LEDs on the board when pressed.
+
+=== Display an image
+
+Next we will display an image on the screen.
+First you will need to find an image to display on the screen.
+Due to the limited resolution and system memory of the display the image size needs to be shrunk down.
+Use a tool like GIMP, MS Paint or similar to resize your image to 200x150 px or close to it.
+
+Next we will use the lvgl image converter tool to convert our image to a C source file.
+Upload your image, set the colour format to RGB888 and hit convert.
+Download your image c file to the app/src directory.
+https://lvgl.io/tools/imageconverter
+
+Next we need to include the new source file.
+Open the app/CMakeLists.txt file and add a new source line for your image.
+An example is given below, but make sure to use the correct name for your image file.
+[]
+image::image_cmake.png[]
+
+Next we can add to the source file to draw the image.
+First we need to include the external global image description variable from the source file we added.
+In the example case this variable was named IMG_4439 after the original source IMG_4439.jpg file.
+Your variable name will be different.
+Then we can create an image object on the screen, set the source to our image, and draw the image to the screen.
+[]
+image::main_image.png[]
+After flashing you should see the image on the center of the screen.
+[]
+image::image_results.jpg[width=50%]
+
+== Exercise
+
+* Implement a slider that can be used to dim a LED.
+* Start planning for your project.
