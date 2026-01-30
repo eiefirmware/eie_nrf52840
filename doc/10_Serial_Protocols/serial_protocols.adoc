@@ -68,7 +68,7 @@ There are 4 SPI modes dependent on the clock phase (CPHA) and clock polarity (CP
 Inter-integrated circuit is another serial communication protocol used for short range communication, typically between ICs  on a single board.
 I2C is half duplex, meaning data can only be sent one direction at a time, and synchronous.
 
-I2C also uses a master-slave topology. 
+I2C also uses a master-slave topology.
 Unlike SPI, I2C only uses 2 lines
 
 * Serial Data
@@ -147,20 +147,20 @@ The 4 line serial interface II in reality consists of 5 lines
 * D/CX
 
 The first 4 lines are the lines we expect for SPI with the data command select line used to tell the LCD driver if we are sending a command or data.
-As we can see in the schematic these lines are all connected to the nRF52840 allowing us to use this bus. 
-The data sheet also mentions that data is read off the SDI line on the rising edge of the clock and that data is shifted out on the falling out of the clock. 
+As we can see in the schematic these lines are all connected to the nRF52840 allowing us to use this bus.
+The data sheet also mentions that data is read off the SDI line on the rising edge of the clock and that data is shifted out on the falling out of the clock.
 This implies we are using SPI mode 0.
 
 ==== Enabling Zephyr to talk over SPI
 
-To talk over SPI with zephyr first we have to enable SPI in the KConfig file. 
+To talk over SPI with zephyr first we have to enable SPI in the KConfig file.
 Open the app/prj.conf file and add the following line to enable SPI.
 
 []
 image::prj_edits.png[]
 
 Next we need to tell zephyr which pins we are using on the board to communicate with the LCD driver.
-To do this we will modify the device tree board overlay for the nRF52840dk. 
+To do this we will modify the device tree board overlay for the nRF52840dk.
 Open the app/boards/nrf52840dk_nrf52840.overlay file in your project and add the following sections.
 
 []
@@ -174,12 +174,12 @@ As the nRF52840dk has the arduino compatible header files the arduino communicat
 At this point we can open the main.c file and add the necessary header files and configure the GPIO pins.
 []
 image::main_c_gpio_configured.png[]
-While the D/C select line was configured similarly to how we have configured GPIO in the past for LEDs or buttons, the CS uses a special data structure. 
+While the D/C select line was configured similarly to how we have configured GPIO in the past for LEDs or buttons, the CS uses a special data structure.
 For now we are setting the delay to 0, but this will be addressed later.
 
 ==== Configuring SPI
 
-At this point we will be configuring the SPI peripheral on the nRF52840. 
+At this point we will be configuring the SPI peripheral on the nRF52840.
 Zephyr uses an internally defined struct to configure the SPI peripheral the definition of which is given below for convenience.
 [C]
 ----
@@ -218,15 +218,15 @@ struct spi_config {
 ----
 Let's look at these fields one by one.
 
-Starting with frequency, this is the speed of the clock. 
-Referring back to the LCD controller datasheet in section 18.3.4 we get a timing diagram giving us the minimum timing for the SPI bus. 
+Starting with frequency, this is the speed of the clock.
+Referring back to the LCD controller datasheet in section 18.3.4 we get a timing diagram giving us the minimum timing for the SPI bus.
 This diagram is copied below for convenience.
 
 .SPI Timing diagram <<ILI9341>>
-image::SPI_timing.png[]
+image::lcd_timing.png[]
 
-In this case for clock frequency we need to look at the stem:[t_{wc}] and stem:[t_{rc}]. 
-These refer to the minimum clock period for a write and read respectively. 
+In this case for clock frequency we need to look at the stem:[t_{wc}] and stem:[t_{rc}].
+These refer to the minimum clock period for a write and read respectively.
 As we want just one time to select a frequency we will use the larger stem:[t_{rc}] of 150 ns.
 Converting this to frequency we get a max clock frequency of 6.6 MHz, meaning we can chose any frequency slower.
 For convenience we will set our clock frequency to 1 MHz or 1 000 000 Hz.
@@ -241,7 +241,7 @@ As a summary from previous sections
 
 * The nRF52840 is the SPI master
 * We are using SPI mode 0
-* We are sending 8 byte packets 
+* We are sending 8 byte packets
 * The data is being sent out MSB first
 
 From this we can construct the bitfield.
@@ -267,7 +267,7 @@ Then we set the D/C select pin high to signal to the LCD we are about to send a 
 Next if data was passed in we can set the D/C select low to signal we are sending data and send the data.
 Remember to also define your function prototype.
 
-Finally we can start sending commands to the LCD. 
+Finally we can start sending commands to the LCD.
 Looking at section 8 of the datasheet all the commands are listed, however we only need a small subset of them which for ease of use we will define as given below
 [C]
 ----
@@ -278,7 +278,7 @@ Looking at section 8 of the datasheet all the commands are listed, however we on
 #define CMD_ROW_ADDRESS_SET 0x2B
 #define CMD_MEMORY_WRITE 0x2C
 ----
-We can use the first free commands to setup the LCD. 
+We can use the first free commands to setup the LCD.
 None of these commands take data.
 []
 image::lcd_setup.png[]
@@ -288,7 +288,7 @@ This uses 3 commands: set column address, set row address and memory write.
 Set column address takes in a start column from 0 to 319 (`0x139`) in 2 bytes and a end column with the same format.
 Set row similarly takes a start row and end row in the range 0 to 239 (`0xEF`).
 Memory write takes in multiples of 3 bytes giving the colour each pixel will be.
-Starting from the top left corner of area specified with the set column and row address memory write can write multiple pixels at once left to write, top to bottom. 
+Starting from the top left corner of area specified with the set column and row address memory write can write multiple pixels at once left to write, top to bottom.
 The LCD does not use a full 8 bits for each colour.
 Instead it uses a 18 bit colour system which the diagram below shows the packing in a SPI packet.
 
@@ -303,8 +303,8 @@ An example of the square is shown below
 []
 image::red_square.jpg[width=50%]
 
-We can also use an oscilloscope or logic analyser to view and decode the spi traces. 
-For example below is showing when the column command and data is sent. 
+We can also use an oscilloscope or logic analyser to view and decode the spi traces.
+For example below is showing when the column command and data is sent.
 The traces from top to bottom are the CS, MOSI, MISO, and CLK.
 At the bottom we can see the scope is decoding the SPI messages, however these are truncated due to the level of zoom.
 []
@@ -324,26 +324,26 @@ image::i2c_config.png[]
 Similarly to when we looked at SPI we will need the datasheet for the FT6206 touch controller.
 The datasheet can be found here: https://cdn-shop.adafruit.com/datasheets/FT6x06%20Datasheet_V0.1_Preliminary_20120723.pdf <<FT6x06>>.
 
-Looking through the datasheet we can see the FT6x06 provides a 
+Looking through the datasheet we can see the FT6x06 provides a
 
-* I2C bus 
+* I2C bus
 * interrupt signal to inform the host processor that there is touch data
 * A reset line
 
 Looking at the schematic in <<fig_schematic>> we can see that only the I2C bus is connected and thus we can ignore the interrupt and reset line.
 In section 2.4 of the data sheet it tells us that the touch controller is always acting as the I2C slave, and that the I2C bus can support a clock frequency between 10 and 400 kHz<<FT6x06>>.
-Missing from the datasheet for the touch controller is the I2C address. 
+Missing from the datasheet for the touch controller is the I2C address.
 Looking through sample code for the FT6206 provided by Adafruit, we can find that the address is `0x38` or 56.
 
 At this point we can start to add to our main.c file to turn on the I2C peripheral.
-We will need to include the relevant header files, access the I2C peripheral from the device tree and create a associated device. 
+We will need to include the relevant header files, access the I2C peripheral from the device tree and create a associated device.
 Then in main we can check if the device is ready to use and configure the I2C bus.
-Zephyr provides the i2c_configure API we can use to configure the I2C device. 
+Zephyr provides the i2c_configure API we can use to configure the I2C device.
 It takes in a device pointer and a config bitfield.
 For the bitfield we will set the speed and I2C mode.
 Based on the datasheet we will set the I2C mode to be a master or `I2C_MODE_CONTROLLER` and the speed to between 10 kHz and 400 kHz.
 Zephyr provides pre-defined speeds for 100 kHz and 400 kHz as `I2C_SPEED_STANDARD` and `I2C_SPEED_FAST`.
-In the example below `I2C_SPEED_FAST` is used, however either speed will work. 
+In the example below `I2C_SPEED_FAST` is used, however either speed will work.
 []
 image::i2c_main_config.png[]
 
@@ -355,7 +355,7 @@ Section 1.1 documents how data is read and written to the touch controller.
 To read data a message is first written to the touch controller containing the register address we wish to read from.
 Then a second message is started which reads the data back from that address<<FT6X06AN>>.
 Section 3 of the application note then documents the various registers that can be read or written from and the data that is sent back or read.
-For a simple driver to read the position of a touch we will need the `TD_STATUS`, `P1_XH`, `P1_XL`, `P1_YH`, and `P1_YL` registers. 
+For a simple driver to read the position of a touch we will need the `TD_STATUS`, `P1_XH`, `P1_XL`, `P1_YH`, and `P1_YL` registers.
 We can define constants to access them and some of the other data we will need more easily
 [C]
 ----
@@ -381,7 +381,7 @@ typedef enum {
 ----
 Next we can write a simple function to send a command and recieve a response using the zephyr `i2c_transmit` API.
 This API takes in the I2C device, an array of messages to be sent/received, the number of messages and the address of the device being talked to.
-We will define the message array with 2 messages. 
+We will define the message array with 2 messages.
 The first message will be a message we write containing the register we want to read from.
 The second message we will read from the bus into the response.
 []
@@ -399,7 +399,7 @@ We can also see at the bottom the scope is decoding the packet and we are first 
 
 == Exercise
 
-* Combine the touch and LCD drivers we have written. 
+* Combine the touch and LCD drivers we have written.
   Have the LCD draw a shape at the location you touch.
 * Create a gradient effect on the LCD over the whole screen.
 * In the lesson we exclusively wrote data to the LCD driver and read data from the touch controller.
