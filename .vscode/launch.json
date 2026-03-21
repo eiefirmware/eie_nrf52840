@@ -1,0 +1,31 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        // Adopted from https://github.com/Marus/cortex-debug/issues/969
+        {
+            "name": "Launch nRF52840",
+            "device": "nRF52840_xxAA",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}${/}build${/}zephyr${/}zephyr.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            "servertype": "jlink",
+            "gdbPath": "${workspaceFolder}${/}..${/}..${/}zephyr-sdk-0.17.2${/}arm-zephyr-eabi${/}bin${/}arm-zephyr-eabi-gdb.exe",
+            "rtos": "Zephyr",
+            "preLaunchTask": "Build and Flash Firmware"
+        },
+        {
+            "name": "Attach nRF52840",
+            "device": "nRF52840_xxAA",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}${/}build${/}zephyr${/}zephyr.elf",
+            "request": "attach",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            "servertype": "jlink",
+            "gdbPath": "${workspaceFolder}${/}..${/}..${/}zephyr-sdk-0.17.2${/}arm-zephyr-eabi${/}bin${/}arm-zephyr-eabi-gdb.exe",
+            "rtos": "Zephyr",
+        },
+    ]
+}
