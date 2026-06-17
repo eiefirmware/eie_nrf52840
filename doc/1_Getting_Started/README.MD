@@ -108,7 +108,9 @@ There is two ways we can do this.
 First we can start the virtual environment in the terminal.
 To do this we run either `source .venv/bin/activate` on Linux and MacOS or `source .venv/Scripts/activate` on Windows from the folder that contains the virtual environment (In our case the eie_nrf52840 directory).
 The image below shows an example of this
+
 ![](imgs/virtual-env.png)
+
 In this example at first I am out of the virtual machine and running `west -V` to show the installed west version fails.
 After I run the command to activate the virtual environment (notice my terminal is in the project directory set up earlier), the virtual environment has been activated.
 We can see the environment is active as the name of the environment, in this case eie-nrf52840, has been pre-pended in parenthesis in front of my terminal prompt.
@@ -120,7 +122,9 @@ If you are using the integrated terminal built into VS Code, it will automatical
 The second way to run tools in the virtual environment is to have uv invoke the virtual environment when we run a command.
 To do this we prepend any command with `uv run`.
 Using the same example above I can get the west version when not in the virtual environment, simply by telling it to run through uv.
+
 ![](imgs/uv-run.png)
+
 In this case however, I would have to prepend `uv run` to all subsequent west commands I want to run.
 
 For the rest of this lesson and all future lessons we assume you have properly activated your virtual environment or are adding `uv run` whenever west is invoked.
