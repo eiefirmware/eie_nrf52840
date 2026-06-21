@@ -1,0 +1,11 @@
+{
+    "tasks": [
+        {
+            "label": "Build and Flash Firmware",
+            "type": "shell",
+            "command": "${workspaceFolder}${/}..${/}.venv${/}Scripts${/}python.exe -m west build -b nrf52840dk/nrf52840 app && ${workspaceFolder}${/}..${/}.venv${/}Scripts${/}python.exe -m west flash --recover",
+            "args": [
+            ""
+            ],
+        }
+}
