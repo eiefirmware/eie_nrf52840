@@ -1,0 +1,67 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+        "label": "Build app",
+        "type": "shell",
+        "command": "uv run west build -b nrf52840dk/nrf52840 ${input:target}${input:cleanFlag}",
+        "options": {
+            "cwd": "${workspaceFolder}"
+        },
+        "group": "build",
+        "presentation": {
+            "echo": true,
+            "reveal": "always",
+            "focus": false,
+            "panel": "shared"
+        },
+        "problemMatcher": []
+    },
+    {
+        "label": "Flash app",
+        "type": "shell",
+        "command": "uv run west flash",
+        "options": {
+            "cwd": "${workspaceFolder}"
+        },
+        "presentation": {
+            "echo": true,
+            "reveal": "always",
+            "focus": false,
+            "panel": "shared"
+        },
+        "problemMatcher": []
+    },
+    {
+        "label": "Build and Flash app",
+        "dependsOn": [
+            "Build app",
+            "Flash app"
+        ],
+        "dependsOrder": "sequence",
+        "problemMatcher": [],
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        }
+    }
+],
+  "inputs": [
+    {
+      "id": "target",
+      "type": "promptString",
+      "description": "Build target",
+      "default": "app"
+    },
+    {
+      "id": "cleanFlag",
+      "type": "pickString",
+      "description": "Clean build?",
+      "default": "",
+      "options": [
+        "",
+        " -p"
+      ]
+    }
+  ]
+}

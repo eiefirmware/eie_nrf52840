@@ -1,6 +1,22 @@
 {
-    "python.terminal.activateEnvironment": true,
+    // Windows default Terminal
     "terminal.integrated.defaultProfile.windows": "Git Bash",
-    "python.defaultInterpreterPath": "${workspaceFolder}/../.venv",
-    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json"
+
+    // Python Settings
+    "python.terminal.activateEnvironment": true,
+
+    // C / C++ Settings
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "clangd.arguments": ["--header-insertion=never", "--enable-config"],
+
+    // Debug settings
+    "cortex-debug.armToolchainPath.windows": "${env:USERPROFILE}\\zephyr-sdk-1.0.1\\gnu\\arm-zephyr-eabi\\bin",
+    "cortex-debug.armToolchainPath.osx": "${env:HOME}/zephyr-sdk-1.0.1/gnu/arm-zephyr-eabi/bin",
+    "cortex-debug.armToolchainPath.linux": "${env:HOME}/zephyr-sdk-1.0.1/gnu/arm-zephyr-eabi/bin",
+    "cortex-debug.armToolchainPrefix": "arm-zephyr-eabi",
+    "memory-view.trackDebuggers": [
+        "cortex-debug",
+        "gdb",
+        "jlinkgdbtarget"
+    ]
 }

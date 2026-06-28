@@ -2,6 +2,7 @@
 :doctype: article
 :imagesdir: imgs
 :toc:
+:sectnums:
 
 == Introduction
 
@@ -137,4 +138,62 @@ For the rest of this lesson and all future lessons we assume you have properly a
 1. If you don't already have a terminal open, open a terminal and navigate to the EIE project directory you cloned
 2. Activate the virtual environment if not already active (see OS specific instructions for how to do so)
 3. Run `west build -b nrf52840dk/nrf52840 app` to build the application
-4. Run `west flash` to flash the board. Note if
+4. Run `west flash` to flash the board. Note if this is your first time flashing you may need to use
+
+== VSCode Setup
+
+Microsoft's Visual Studio Code (VSCode) is the recommended IDE for EIE, however any other will also work.
+The following section covers setup for tooling for EIE.
+If you are not using VSCode you can skip this section.
+
+. If you don't already have VSCode installed install it from [here](https://code.visualstudio.com/) and run the installer.
+. Open the project directory in VSCode.
+This can be done by either opening vscode and using `File > Open Folder` and opening the eie_nrf52840 directory we had cloned in the earlier steps or in a terminal navigate to the eie_nrf52840 directory and run `code .`
++
+WARNING: Do not just open the files you are editing.
+VSCode uses files in the `.vscode`, `.venv`, and `.git` folders in the `eie_nrf52840` directory to help us with editing our project.
+If you just open the source files we want to edit without opening the full project VSCode may not be able to debug, or properly inspect certain parts of your project.
++
+Once open you should have a view similar to this.
+At the very least you should see the a similar directory structure to the one seen on the left.
++
+.VSCode on Startup
+image::code-startup.png[]
+
+. By default on the far left side of the VSCode window we see what is known as the "activity bar".
++
+.The VSCode Activity Bar. Source https://code.visualstudio.com/api/ux-guidelines/activity-bar[microsoft]
+image::activity-bar.png[]
++
+By default the activity bar contains in order
++
+* **Explorer**: This is where you can see and open any files.
+It can be quickly accessed with `CTRL+SHIFT+E` (`&#x2318;+SHIFT+E` on mac)
+* **Search**: This is a global search area that can be used to search all files in your current open project.
+It can be quickly accessed with `CTRL+SHIFT+F` (`&#x2318;+SHIFT+F` on mac).
+If you have text selected when you use the quick access shortcut it will enter that text as the search field.
+It can also be used to find and replace across your whole project and supports regular expression (regex) search allowing you to search for text matching a pattern.
+See https://code.visualstudio.com/docs/editing/codebasics#_search-across-files[Microsoft's Documentation] for more details.
+* **Source Control**: This tab allows you to track changes being made to your project.
+We will cover it in more detail in link:../2_Version_Control/README.MD[lesson 2] which is on the version control system git.
+It can be quickly accessed with `CTRL+SHIFT+G` (`&#x2318;+SHIFT+G` on mac).
+* **Run and Debug**: This tab allows you to start a debug session of your project.
+It will be covered in more detail in a future lesson.
+It can be quickly accessed with `CTRL+SHIFT+D` (`&#x2318;+SHIFT+D` on mac).
+* **Extensions**: This tab allows you to install extensions for VSCode that modify and extend its functionality.
+It can be quickly accessed with `CTRL+SHIFT+E` (`&#x2318;+SHIFT+E` on mac).
+We want to install the recommended extensions for EIE.
+If you search `@recommended` in extensions tab the recommended extensions for EIE will come up.
+Install all extensions listed under Workspace Recommendations
++
+.Search for `@recommended` extensions. Install everything that is listed under Workspace Recommendations. Note this is not a complete list in the image
+image::vscode-extensions.png[]
+
+. When prompted to, install clangd.
++
+image::clangd_prompt.png[]
++
+. Restart VSCode after installing extensions.
+
+
+At this point VSCode is ready for us to use.
