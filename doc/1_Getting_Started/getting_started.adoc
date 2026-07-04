@@ -2,6 +2,7 @@
 :doctype: article
 :imagesdir: imgs
 :toc:
+:source-highlighter: highlight.js
 :sectnums:
 
 == Introduction
@@ -195,5 +196,82 @@ image::clangd_prompt.png[]
 +
 . Restart VSCode after installing extensions.
 
-
 At this point VSCode is ready for us to use.
+
+=== Brief intro to VSCode
+
+This section provides a brief intro some useful features of VSCode you may not be familiar with that we will be using in EIE.
+This assumes a basic knowledge of how to use VSCode as a text editor.
+
+We will be using the terminology defined by Microsoft for the various elements of the UI.
+
+.VSCode basic layout. Source microsoft
+image::code-layout.png[]
+
+=== Explorer
+
+The Explorer is accessed via the activity bar and is viewed in the primary side bar.
+It shows a tree view of all files in the currently open project and allows you to open them.
+The explorer file tree highlights files you have modified since you last interacted with the version control system.
+This will be explored in more detail in the the next lesson on version control.
+
+It also shows an outline and timeline of the currently open file allowing you to easily find what is defined in the file you are looking at and view its history.
+
+.The explorer for the EIE project. We can see the file list at the top with the outline of the open file, in this case LED.c, showing all the C type, variable and function declarations and editing timeline of the file.
+image::explorer.png[]
+
+=== Debugger
+
+The debugger allows us to build, flash and step through the execution of our program line by line.
+We will cover the debugger in more detail in a future lesson but for now you can start debugging by pressing the green play button in the top.
+Make sure the debug configuration selected is "Cortex Debug".
+You can also launch the debugger from anywhere by pressing `F5` (Depending on your computer you may either need to enable function lock or use `FN+F5`` to preform this shortcut.)
+The debugger can show you the state of variables as you step through the program, the call stack (what functions have been called to get to the point we are at), and the current line being executed.
+
+.The VSCode Debugger
+image::debug.png[]
+
+=== The Panel
+
+The panel provides additional information and tools below the editor.
+For now the two tools we will look at in the panel are the Problems and Terminal panel.
+The panel can be opened or closed using `CTRL+J` (`&#x2318;+J` on mac).
+
+The problems panel shows you a quick list of issues with your code.
+For example consider the following code snippet where a variable was defined and then misused.
+
+image::bad_code.png[]
+
+The problems panel highlights exactly where this happened and in this case gives a suggested solution.
+
+.The Problem panel
+image::problems_panel.png[]
+
+The terminal panel is a built in terminal in VScode.
+It also will automatically start the correct python virtual environment if one is defined in the workspace.
+The terminal can be toggled open using `CTRL+\`` (`&#x2318;+`` on mac) or a new terminal can be opened with `CTRL+SHIFT+\`` (`&#x2318;+SHIFT+`` on mac)
+
+.The VScode terminal
+image::terminal_panel.png[]
+
+=== Building from VSCode
+
+We define several tasks to build, and flash the nRF52840 dev kit.
+We can view all tasks by hitting `CTRL+SHIFT+P` (`&#x2318;+SHIFT+P` on mac) to bring up the command pallet and entering `Tasks: Run Tasks`
+This pulls up the list of tasks shown below
+
+image::Tasks.png[]
+
+The 3 tasks we define are:
+
+- **Build**: Build the firmware. Allows specifying a pristine build and the build target.
+- **Flash**: Flash the latest build onto the connected dev kit.
+- **Build and Flash**: Combines Build and Flash into one step.
+
+Any other tasks listed are not relevant.
+
+The Build and Flash task is also defined as a default build task and can be launched at any time with the shortcut `CTRL+SHIFT+B` (`&#x2318;+SHIFT+B` on mac)
+
+=== Learn More
+
+https://code.visualstudio.com/docs[Microsoft's documentation] provides more resources for learning about the features of VSCode.

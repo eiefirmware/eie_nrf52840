@@ -18,5 +18,8 @@
         "cortex-debug",
         "gdb",
         "jlinkgdbtarget"
-    ]
+    ],
+
+    // Task Window Settings
+    "task.quickOpen.showAll": false,
 }
