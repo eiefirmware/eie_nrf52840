@@ -4,7 +4,7 @@
     {
         "label": "Build app",
         "type": "shell",
-        "command": "uv run west build -b nrf52840dk/nrf52840 ${input:target}${input:cleanFlag}",
+        "command": "uv run west build -b nrf52840dk/nrf52840 ${input:target}${input:cleanFlag}${input:shield}",
         "options": {
             "cwd": "${workspaceFolder}"
         },
@@ -61,6 +61,16 @@
       "options": [
         "",
         " -p"
+      ]
+    },
+    {
+      "id": "shield",
+      "type": "pickString",
+      "description": "LCD shield",
+      "default": "",
+      "options": [
+        "",
+        "--shield=adafruit_2_8_tft_touch_v2"
       ]
     }
   ]
