@@ -9,3 +9,4 @@
 # account
 
 add_subdirectory(drivers)
+add_compile_options(-Wall -Wextra -Wshadow -Wdouble-promotion -Wvla)
