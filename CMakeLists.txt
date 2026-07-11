@@ -10,3 +10,4 @@
 
 add_subdirectory(drivers)
 add_compile_options(-Wall -Wextra -Wshadow -Wdouble-promotion -Wvla)
+set(CMAKE_EXPORT_COMPILE_COMMANDS on)
