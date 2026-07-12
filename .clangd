@@ -1,0 +1,7 @@
+CompileFlags:
+  CompilationDatabase: build
+  Remove: [-fno-printf-return-value, -mfp16-format=ieee, -fno-reorder-functions, -ferror-limit=0]
+
+InlayHints:
+  ParameterNames: true
+  Designators: true

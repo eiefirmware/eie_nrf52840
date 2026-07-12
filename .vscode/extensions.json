@@ -4,7 +4,7 @@
   // List of extensions which should be recommended for users of this workspace.
   "recommendations": [
     "dan-c-underwood.arm",
-    "ms-vscode.cpptools-extension-pack",
+    "llvm-vs-code-extensions.vscode-clangd",
     "marus25.cortex-debug",
     "trond-snekvik.gnu-mapfiles",
     "keroc.hex-fmt",
@@ -13,7 +13,10 @@
     "mhutchie.git-graph",
     "eamodio.gitlens",
     "ms-vscode.vscode-serial-monitor",
-    "nordic-semiconductor.nrf-devicetree"
+    "mcu-debug.memory-view",
+    "mcu-debug.peripheral-viewer",
+    "mcu-debug.rtos-views",
+    "mcu-debug.debug-tracker-vscode"
   ],
   // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
   "unwantedRecommendations": []
