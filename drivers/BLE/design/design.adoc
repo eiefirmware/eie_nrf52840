@@ -1,0 +1,164 @@
+= Easy BLE API design
+:doctype: article
+:imagesdir: imgs
+:toc:
+:source-highlighter: highlight.js
+:sectnums:
+
+== Introduction
+
+The zephyr BLE API is complex and offers more control then what students need for the EIE course.
+In general students only really care about the ability to send data between 2 devices, or their device and a computer.
+
+== Requirements
+
+* An API must exist to send data from the nRF52840dk to a connected device
+* An API must exist to receive data from a connected device on the nRF52840
+* The send and receive data APIs shall be role agnostic.
+  They must function similarly from the application level regardless of if the nRF52840 is in the GAP central or peripheral role.
+* An API must exist to start advertising.
+* An API must exist to scan and connect to a device we can exchange data with by name.
+* All APIs shall be non blocking.
+* We shall be able to connect to a computer with the ability for a student created program to interact with the data.
+* We may support connection to 2 or more devices simultaneously.
+
+== API
+
+The API will primarily consist of the following functions.
+[source,c]
+----
+int eie_ble_startup(struct eie_ble_cb const *callbacks);
+
+int eie_ble_start_advertise(const char* device_name);
+
+int eie_ble_stop_advertise(void);
+
+int eie_ble_connect(const char* device_name);
+
+int eie_ble_disconnect(uint8_t connection_index);
+
+int eie_ble_send_data(uint8_t connection_index, );
+----
+
+Two callbacks will be defined to handle asyncronous events
+[source,c]
+----
+typedef void (*eie_ble_event_cb)(uint8_t connection_index, enum eie_ble_event);
+
+typedef void (*eie_ble_message_received_cb)(uint8_t connection_index,
+                                            struct eie_message_data*);
+----
+
+== Data formatting
+
+The two APIs that interact with data will use a data structure defined below.
+[source, c]
+----
+struct eie_message_data {
+  size_t length;
+  uint16_t message_id;
+  uint8_t* data;
+};
+----
+Where:
+
+* `length` is the length of the data buffer
+* `message_id` is a student defined id to differentiate between various messages.
+* `data` is a uint8_t buffer holding the actual data.
+
+Ideally the buffer would hold data defined by a protobuf and then can be decoded using https://jpa.kapsi.fi/nanopb/[nanopb], however this is not explicitly required.
+The message id would be a 16 bit number students can use to differentiate between different messages.
+In the over the air data packet the message id would be prepended in front of the data buffer.
+The data buffer length will be inferred as the size of the packet excluding the message id.
+
+.Over the air packet format
+[%autowidth]
+|===
+|Field |Data Type| Size (in octets) | Description
+
+|Message ID | uint16 | 2 | Message ID used to determine how to decode message
+|Data buffer| uint8[n] | n*1 | n byte buffer containing the actual message
+|===
+
+== GATT structure
+
+To support being able to have communication between the nRF52840 and a computer we will likely make use of the https://bleak.readthedocs.io[bleak python library].
+Bleak has the following limitations which will impact the design going forward:
+
+* Bleak can only implement a BLE GAP central
+* Bleak can only implement a BLE GATT client
+
+The service would consist of 2 characteristics.
+The first characteristic would have the notify property and would be used to send messages from a peripheral to a central.
+The second characteristic would have the write property and would be used to send messages from a central to a peripheral.
+Both the write and notify characteristics will encode data using the packet structure described in the previous section.
+
+== Control Flow
+
+The following diagram shows the expected usage of the APIs to start a connection as a peripheral
+[plantuml]
+....
+@startuml
+participant App as app
+participant "Simple BLE API" as ble
+participant "Remote Device" as remote
+
+app -> ble: eie_ble_startup
+ble -> ble: register callbacks
+
+app -> ble: eie_ble_start_advertise
+ble -> ble: start advertising
+note over remote: Assume remote is scanning
+ble -> remote: ADV_IND
+remote -> ble: SCAN_REQ
+ble -> remote: SCAN_RSP
+remote <-> ble: CONNECT_IND
+ble -> app: eie_ble_event_cb(..., EIE_CONNECTED)
+remote <-> ble: Service discovery and subscription process
+ble -> app: eie_ble_event_cb(..., EIE_READY_FOR_DATA)
+@enduml
+....
+
+The following diagram shows the expected usage of the APIs to send and receive data
+
+[plantuml]
+....
+@startuml
+
+participant App as app
+participant "Simple BLE API" as ble
+participant "Remote Device" as remote
+
+hnote over app, remote
+    We are peripheral, Remote is central
+    We are sending data
+endhnote
+
+app -> ble: eie_ble_send_data
+ble -> remote: ATT_NOTIFY
+
+hnote over app, remote
+    We are peripheral, Remote is central
+    We are receiving data
+endhnote
+
+remote -> ble: ATT_WRITE
+ble --> app: eie_ble_message_received_cb
+
+hnote over app, remote
+    We are central, Remote is peripheral
+    We are sending data
+endhnote
+
+app -> ble: eie_ble_send_data
+ble -> remote: ATT_WRITE
+
+hnote over app, remote
+    We are central, Remote is peripheral
+    We are receiving data
+endhnote
+
+remote -> ble: ATT_NOTIFY
+ble --> app: eie_ble_message_received_cb
+@enduml
+....

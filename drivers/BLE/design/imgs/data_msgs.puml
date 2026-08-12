@@ -1,0 +1,39 @@
+@startuml
+
+participant App as app
+participant "Simple BLE API" as ble
+participant "Remote Device" as remote
+
+hnote over app, remote
+    We are peripheral, Remote is central
+    We are sending data
+endhnote
+
+app -> ble: eie_ble_send_data
+ble -> remote: ATT_NOTIFY
+
+hnote over app, remote
+    We are peripheral, Remote is central
+    We are receiving data
+endhnote
+
+remote -> ble: ATT_WRITE
+ble --> app: eie_ble_message_received_cb
+
+hnote over app, remote
+    We are central, Remote is peripheral
+    We are sending data
+endhnote
+
+app -> ble: eie_ble_send_data
+ble -> remote: ATT_WRITE
+
+hnote over app, remote
+    We are central, Remote is peripheral
+    We are receiving data
+endhnote
+
+remote -> ble: ATT_NOTIFY
+ble --> app: eie_ble_message_received_cb
+
+@enduml
