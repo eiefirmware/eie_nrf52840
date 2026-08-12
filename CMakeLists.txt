@@ -8,6 +8,9 @@
 # This is needed so that custom driver classes using system calls are taken into
 # account
 
+list(APPEND CMAKE_MODULE_PATH ${ZEPHYR_BASE}/modules/nanopb)
+include(nanopb)
+
 add_subdirectory(drivers)
 add_compile_options(-Wall -Wextra -Wshadow -Wdouble-promotion -Wvla)
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)

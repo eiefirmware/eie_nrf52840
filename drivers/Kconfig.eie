@@ -1,0 +1,27 @@
+menu "EIE"
+
+config EIE_SIMPLE_BLE
+    bool "Enable simple BLE API"
+    default n
+    select EVENTS
+    select BT
+    select BT_PERIPHERAL
+
+config BT_L2CAP_TX_MTU
+    int
+    default 247 if EIE_SIMPLE_BLE
+    depends on BT_CONN && BT_HCI_HOST && BT_HCI && BT
+
+config BT_BUF_ACL_RX_SIZE
+    int
+    default 251 if EIE_SIMPLE_BLE
+    depends on BT_HCI && BT
+
+config EIE_ZEPHYR_DEBUG
+    bool "Enable threading debug"
+    default n
+    select DEBUG_THREAD_INFO
+    select THREAD_MONITOR
+    select THREAD_NAME
+
+endmenu

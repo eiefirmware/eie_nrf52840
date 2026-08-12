@@ -19,3 +19,4 @@ manifest:
         name-allowlist:
           - cmsis_6    # required by the ARM port for Cortex-M
           - hal_nordic # required by the nRF52840
+          - nanopb
