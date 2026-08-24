@@ -1,0 +1,369 @@
+= Basic GPIO, LED & Buttons
+:doctype: article
+:imagesdir: imgs
+:toc:
+
+== Let's Blink an LED
+. To start with we need to add some bare minimum code to our `main.c` file.
+We need to include `LED.h` and the Zephyr kernel header, then define the main function.
+In the main function we will create an infinite while loop where our code will run.
+This is a common pattern in embedded systems where there is no operating system to return to, so the application runs forever and main never returns.
++
+[source,c]
+----
+#include <zephyr/kernel.h>
+#include "LED.h"
+
+int main(void) {
+    while (1) {
+    }
+    return 0;
+}
+----
+At this point the application should build but won't do anything.
++
+----
+west build -b nrf52840dk/nrf52840 app
+----
+.. If the build is successful add the main.c file to the git staging area and commit the change. Use a commit message like "Add minimum main function".
+. Before we can control any LEDs we need to initialize the LED driver by calling `LED_init()`.
+This configures the GPIO pins connected to each of the four LEDs on the nRF52840DK as outputs so they are ready to use.
++
+[source,c]
+----
+int main(void) {
+    LED_init();
+
+    while (1) {
+    }
+    return 0;
+}
+----
+. Add your changes to the main.c file and commit them to git with a message like "Initialize LED driver".
+. Now we need to make the LED blink.
+The LED driver provides the following functions to control individual LEDs:
+
+* `LED_set(led_id, led_state)`: Sets an LED on or off. Pass `LED_ON` or `LED_OFF` as the state.
+* `LED_toggle(led_id)`: Toggles an LED between on and off.
+
++
+The `led_id` parameter identifies which LED to control: `LED0`, `LED1`, `LED2`, or `LED3`.
++
+In our case we will use `LED_toggle(LED0)` to blink the first LED inside the while loop.
++
+[source,c]
+----
+int main(void) {
+    LED_init();
+
+    while (1) {
+        LED_toggle(LED0);
+    }
+    return 0;
+}
+----
+At this point you should be able to build the application and flash it to the board and the LED should blink.
+----
+west build -b nrf52840dk/nrf52840 app
+west flash
+----
+
+== EiE LED APIs
+
+In addition to the simpler button APIs, we'll also provide a simplified LED API:
+
+1. To use LED APIs, you need to include "LED.h" in your main.c file (not the same public/private naming convention)
+2. You then need to initialize the LED module by calling `LED_init`, also remembering to check the return value
+   in case something failed
+3. In your program, there are 3 APIs you can call:
+** `int LED_toggle(led_id led)`: Returns 0 on success, toggles the given LED's state
+** `int LED_set(led_id led, led_state new_state)`: Returns 0 on success, sets the given LED's state to new_state
+      (new_state can be either LED_ON or LED_OFF)
+** `void LED_blink(led_id led, led_frequency frequency)`: No return value, starts blinking the given LED
+      at the specified frequency (LED_1HZ, LED_2HZ, LED_4HZ, LED_8HZ, LED_16HZ). This is a non-blocking function,
+      meaning it returns immediately and handles blinking the LED separately.
+  You pick which LED to pass these functions by using `LEDx` where x is the LED number (0 - 3 on nRF52840dk)
+
+
+=== Why is my LED not blinking?
+
+. Let's look at the LED pin on an oscilloscope.
++
+image::led_scope.png[]
+
+We can see that the LED is blinking, but it is toggling every 500 nanoseconds!
+This is far faster than we are able to see with our eyes.
+. To fix this we need to add a delay between each `LED_toggle` call.
+We will use the Zephyr `k_msleep` function which puts the processor to sleep for a specified number of milliseconds.
+In general in embedded systems we want the processor to be asleep as much as possible to save power.
+When asleep the microcontroller puts the processor in a low power state while keeping peripherals like timers running to wake the processor up when it needs to do something.
+After adding the delay the code should look like this and the LED should blink.
++
+[source,c]
+----
+int main(void) {
+    LED_init();
+
+    while (1) {
+        LED_toggle(LED0);
+        k_msleep(500);
+    }
+    return 0;
+}
+----
+. Now we can build and flash the application to the board again and the LED should blink once per second.
++
+----
+west build -b nrf52840dk/nrf52840 app
+west flash
+----
+. Add your changes to the main.c file and commit them to git with a message like "Make LED blink".
+
+== Exercise
+
+Now that we have gotten one LED to blink on your own try the following:
+
+* Make the other 3 LEDs (`LED1`, `LED2`, `LED3`) blink using `LED_toggle`.
+* Make one LED blink twice as fast as the others by adjusting the `k_msleep` delay.
+* Make the LEDs blink in a sequence using `LED_set(led_id, LED_ON)` and `LED_set(led_id, LED_OFF)`. (Example: turn each LED on one at a time in a loop)
+* As a bonus, try using `LED_blink(led_id, led_frequency)` to blink an LED automatically without needing a manual delay loop. The available frequencies are `LED_1HZ`, `LED_2HZ`, `LED_4HZ`, `LED_8HZ`, and `LED_16HZ`.
+
+Create a separate commit for each part of the exercise you complete. When you are done push your changes to your copy of the repository on GitHub.
+----
+git push origin embedded_primer
+----
+
+== PWM - Pulse Width Modulation
+
+This will cover *Pulse Width Modulation*, which is usually abbreviated to *PWM*. PWM is a very
+common technique used in embedded systems to emulate an analog output with only digital pins.
+
+=== Motivation
+
+Computers are digital, but the world is analog. Because of this, embedded systems need to both
+measure and produce analog signals with only digital circuitry at their disposal. Chips often
+produce analog signals using digital to analog converters, but these are expensive in terms of
+silicon area, power consumption and added hardware complexity. Enter pulse width modulation, a
+technique to produce "analog" signals using a basic GPIO pin and a hardware timer. This is drastically
+cheaper and is good enough in many applications!
+
+=== How does it work?
+
+The definition of PWM is the method of sending a series of pulses where the width (the on-time) of
+the pulses can be varied. The average voltage seen by the load is equal to the ratio of the pulse
+width (pulse on-time) to the pulse period (pulse on-time + off-time), multiplied by the pulse amplitude.
+
+[stem]
+++++
+V_{avg} = \frac{T_{\text{width}}}{T_{\text{period}}} \times V_{\text{max}}
+++++
+
+The ratio of pulse width to pulse period expressed as a percentage is called the *duty cycle*
+
+For example, if you send a series of 1V pulses with a 10ms period and a 5ms on-time, the average
+voltage seen by the load will be 0.5V! The ratio of the pulse width to the pulse period is 5ms / 10ms,
+or 0.5 in this case, therefore the average voltage seen by the load is 0.5 * 1V or 0.5V (as seen below)
+
+image::PWM_1V_10ms_50.png[]
+
+This PWM setting has a duty cycle of 50 %
+
+Take another example, let's reduce the pulse width to just 20% of the pulse's overall period. With
+this setup, our average load voltage should be 2ms / 10ms * 1V or 0.2V:
+
+image::PWM_1V_10ms_20.png[]
+
+This PWM setting has a duty cycle of 20%
+
+For one last example, let's increase the pulse width all the way to 80% of the pulse's overall
+period. In this case, the average load voltage will be 8ms / 10ms * 1V or 0.8V!
+
+image::PWM_1V_10ms_80.png[]
+
+This PWM setting has a duty cycle of 80%
+
+As you can see, we can vary the average voltage seen by the load just by varying how long the pulse
+is on for! We can even add a capacitor to the output of the PWM to get a smoothed signal (a true analog signal),
+note that this isn't always done and can delay the response of the signal:
+
+image::PWM_1V_10ms_50_smoothed.png[]
+
+Note: We will not be using a capacitor for our PWM LEDs
+
+=== How will we be using it?
+
+Human eyes can only track changes happening as fast as ~30 Hz, and above that frequency (known as the
+flicker-fusion threshold) LED flashes fuse and can't be distinguished. This means that we can use PWM
+to vary how bright an LED appears. Think of our eyes as the capacitor in this case, and that their
+inability to detect rapid changes "smoothes" the LED to look more or less bright.
+
+Because we need to be well above the flicker-fusion threshold for the LED to appear smooth and not
+flickering, PWM signals controlling LED brightness are usually between 50 - 100 Hz.
+
+As an example, say we power an LED using a PWM signal with a duty cycle of 50%, the LED will appear to
+be approximately half as bright as if we gave it full power. It's important to note that this doesn't
+mean that the LED is actually on at half the brightness - the LED is turning fully on and fully off so
+quickly that it only appears to be half as bright as our eyes blur the rapid changes.
+
+It's important to note that PWM is used in many applications beyond simple LED brightness, for example:
+* Servo motor control
+* Voltage regulation
+* Buzzer control
+
+=== Setup
+
+1. Fetch the newest version of the EiE repo using `git fetch upstream main`
+2. Go to your local copy of the main branch using `git checkout main`
+3. Sync your local main branch with the EiE repo using `git pull upsream main`
+4. Create a new branch for lesson 6 using `git checkout -b lesson-6`
+
+=== EIE LED PWM API
+
+We've added a new API to the LED module that you can now use to turn on an LED at a given PWM duty cycle:
+`int LED_pwm(led_id led, uint8_t duty_cycle)`: sets the LED to the given duty cycle. Note that the duty_cycle
+argument accepts values between 0 and 100. Returns 0 on success and a negative error code on failures. PWM uses
+frequency of 50 Hz. The LED will continue running at the given duty cycle until changed again by another LED API call.
+
+=== Example program
+
+Here is an example of how the LED PWM API should be used:
+
+image::ExampleMain.png[]
+
+You should recreate this and see what happens when you click BTN0 enough times for the LED to cycle through all
+brightnesses a few times. What do you notice about how much the brightness increases between 0 - 50% vs 50 - 100%?
+
+== Buttons
+
+Buttons are one of the core ways to get input from a user, and are one of the most basic ways a user
+can interact with any computer based system.
+
+=== How do you use a button?
+
+To use a button you first need to:
+1. Initialize it:
+   This involves using the buttons' device tree identifier to fetch key information
+   to populate a gpio_dt_spec struct representing the button
+2. Configure it:
+   This involves setting the characteristics of how you want the button to behave during the
+   program, including any interrupt settings (explained below).
+
+When it comes to checking if a button is/has been pressed, there are two paradigms:
+1. Polling:
+   The simple solution. This involves periodically checking whether or not a button is being
+   pressed. This is sometimes all you need, but the problem is that you can easily miss events and
+   that you constantly have to read the button input. To use a metaphor, this is like putting a pie
+   into the oven, and then having to come back to check the oven every few minutes to see if it's
+   done cooking yet.
+2. Interrupts:
+   The robust solution. This involves writing a special function that gets called when an event
+   (you get to decide what kind of event) occurs to the button. This "interrupt function" is called
+   an *Interrupt Service Routine* (ISR). When the event you specified occurs, the processor will
+   stop whatever it is doing and go execute the associated ISR. Interrupts are crucial for embedded
+   systems, as they allow them to respond to random events without wasting processing power by
+   always being active and reading an input. With an interrupt-based program, you can put the
+   processor to sleep, and only do work when an interrupt is triggered, which would cause the
+   processor to wake up so it can handle the event. To extend the previous metaphor, this is like
+   putting a pie into the oven and then setting a timer - you can go do whatever you want without
+   needing to constantly check the pie, and then when it's done you get alerted and can go deal
+   with it.
+
+=== Button bouncing
+
+Unfortunately, buttons aren't perfect and the metal contacts inside of them aren't exactly flat. Because of this,
+when you click a button, the metal contacts "bounce" very quickly several times before they make consistent contact.
+Using an oscilloscope, we can see exactly what this looks like:
+
+image::BounceScope.png[]
+
+(Image from: https://hackaday.com/2015/12/09/embed-with-elliot-debounce-your-noisy-buttons-part-i/ which is an
+  excellent source on button bouncing and how to debounce.)
+
+Notice how the button voltage (high == on, low == off) jumps several times before it ever stabilizes? This is
+what's causing our problem with seeing multiple print statements each time it's clicked! Sometimes the jumps
+are high enough that they cross the voltage threshold needed to count as an "edge to active" and trigger
+the interrupt, but sometimes they don't, and that's why you only it only prints multiple times *sometimes*.
+
+There's lots of ways you can fix this, but the simplest way boils down to a debounce delay, here's how it works:
+The button gets clicked and bounces, when the first edge to active is hit interrupts get disabled for some
+debounce delay (typically between 10 - 50ms). After the delay is over, they get turned back on, and the state of
+the button is checked, if it's high at that point (i.e. the button is pressed) then this counts as a single
+click, and a flag is set somewhere in your program. The strategy here is to wait out the initial instability
+and then check once things have stabilized. Different buttons have different bouncing durations, so it's
+important to keep that in mind when writing a debouncing system.
+
+Because debouncing buttons can be complicated, we'll provide you with some functions you can use
+that handle debouncing internally. Usually, we refer to one or more functions that give you an
+interface into a module as "APIs" or *Application Programmer Interfaces*.
+
+=== EiE Button APIs
+
+Here's a rundown of how the APIs we'll provide work:
+
+1. To use the button APIs, you need to include "BTN.h" in your main.c file
+  * Note that here, capital letters in the header name indicate this is a "public" header, and that
+     you can use the functions and types declared there freely. You'll notice the implementation file
+     is called "btn.c", this is because it's intended to be private to enfore encapsulation (modularity).
+     A "private" function is one that you aren't supposed to use since it's not made to be called outside
+     a very specific context.
+2. You then need to initialize the button module by calling `BTN_init` somewhere before your main loop,
+   you also need to check the return value of `BTN_init` in the event that it failed (remember that
+   error codes are negative by convention on Zephyr)
+3. In your program, there are 4 APIs you can call:
+** `bool BTN_is_pressed(btn_id btn)`: Returns true if the given button is currently being pressed
+** `bool BTN_check_clear_pressed(btn_id btn)`: Returns true if the given button has been pressed since you last checked
+      its internal flag, clears the internal flag upon returning
+** `bool BTN_check_pressed(btn_id btn)`: Returns true if the given button has been pressed since you last checked
+      its internal flag, does not clear the internal flag upon returning
+** `void BTN_clear_pressed(btn_id btn)`: Returns nothing, clears the internal state flag of the given button
+  You pick which button to pass these functions by using `BTNx` where x is the button number (0 - 3 on nRF52840dk)
+
+`BTN_check_pressed` and `BTN_clear_pressed` are provided to give you more flexibility, but in most
+cases you will find that using either `BTN_is_pressed` or `BTN_check_clear_pressed` will be all that you need.
+
+We wanted you to get a hands-on experience using the buttons as a raw gpio_dt_spec with the
+Zephyr gpio APIs before we gave you our advanced APIs that handle all the complexity internally. This
+is because it's crucial to understanding how buttons are handled at a (somewhat) low level. However
+from now on you can use the simplified APIs that we provide.
+
+==== Example program:
+
+Here is an example program:
+
+image::ExampleMainWithBtnApi.png[]
+
+Before running it, can you see what this program will do?
+Build this and flash it to your board. Now click the button 15 times and count how many times
+"Button 0 pressed!" got printed, do you still see bouncing?
+
+== Exercises
+
+Create separate git commits for each part of the exercise. Once you're done with this lesson, push
+your changes to the debug_buttons branch of your repository.
+
+* Create a 4-bit binary counter using all 4 LEDs. An LED being off should represent a binary 0,
+  and an LED being on should represent a binary 1. The internal counter should increment each time
+  BTN0 is pressed. The LEDs should reset once the internal counter reaches 16.
+
+*Challenge:*
+1. Create a password system that uses BTN0, BTN1, BTN2 as inputs, and BTN3 as the "enter" button.
+   The program should start in a locked state with LED0 turned on. The user should be able to click
+   a combination of BTN0, BTN1, BTN2 (that you choose at compile time) as the passkey entry stage.
+   Once the user clicks BTN3, "Correct!" should be printed if the password was correct, and "Incorrect!"
+   should be printed if the password was wrong. After the user entered their password with BTN3, LED0
+   should turn off and your program should enter a "waiting" state. The user should be able to press
+   any button to reset the program back to its locked state while it's in the waiting state, and the
+   program should reset.
+
+2. When the board starts, turn LED3 on for 3 seconds. During those 3 seconds, the user should be able
+   to click BTN3, which puts the program into an "entry" mode until BTN3 is clicked again. The user should be
+   able to enter a password of their choice by entering a sequence of BTN0, BTN1, BTN2. Once they click BTN3,
+   the password should be saved, and the program should enter the locked state, where it should function the
+   same way as part 1 of this exercise.
+
+[bibliography]
+== References
+
+* [[[nordic-block, 1]]] Nordic Semiconductor. _Block Diagram._ [Online]. Available: https://docs.nordicsemi.com/bundle/ps_nrf52840/page/blockdiagram.html
+* [[[nordic-gpio, 2]]] Nordic Semiconductor. _GPIO - General purpose input/output._ [Online]. Available: https://docs.nordicsemi.com/bundle/ps_nrf52840/page/gpio.html
+* [[[nordic-build-system, 3]]] Nordic Semiconductor. _Build and Configuration System._ [Online]. Available: https://docs.nordicsemi.com/bundle/ncs-latest/page/nrf/app_dev/config_and_build/config_and_build_system.html
