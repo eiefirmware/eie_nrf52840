@@ -43,3 +43,5 @@ int eie_ble_startup(struct eie_ble_cb const* callbacks);
 int eie_ble_start_advertise(const char* device_name);
 
 int eie_ble_stop_advertise(void);
+
+int eie_ble_connect(const char* device_name);

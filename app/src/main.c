@@ -32,7 +32,7 @@ int main(void) {
   if (0 > eie_ble_startup(&(struct eie_ble_cb){eie_event, message_received})) {
     return 0;
   }
-  eie_ble_start_advertise("Test EIE device");
+  eie_ble_connect("Test EIE Device");
   LED_blink(LED1, LED_1HZ);
   while (1) {
     k_msleep(SLEEP_MS);
