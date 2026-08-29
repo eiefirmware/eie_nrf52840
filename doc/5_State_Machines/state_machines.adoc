@@ -10,14 +10,13 @@
 In this lesson we are going to start to write more complex embedded programs.
 To help accomplish this we are going to cover a powerful design pattern used in many embedded systems : State machines.
 
-A state machine is an exercise in software design
+A state machine is an exercise in design
 
 === Why state machines
 
-You've just got off the phone with Bobby McBob, the director at the CSA, and they've requested a new iteration of the Canadarm for the new upcoming Artemis 26 mission. Apparently, they've decided that **you're** the person who's going to lead the design and development of it.
+You've just got off the phone with Bobby McBob, the director at the CSA, and they've requested a new iteration of the Canadarm for the new upcoming Artemis 26 mission. Apparently, they've decided that you are the person who's going to lead the design and development of it.
 
 There's just one small problem : you've had next to no experience designing robotic arms.
-ne
 But that's okay. You've got some time, a decent engineering notebook, and an internet connection. Over the next few days, you start doing your homework. You watch videos of robotic arms moving around in space, read about how spacecraft systems are controlled, and spend far too much time watching videos of robots doing things that look deceptively simple.
 
 Eventually, you start to feel like you might actually know what you're doing.
@@ -40,7 +39,7 @@ Before you start writing any code, though, you decide to mentally walk through a
 
 You start with the obvious one:
 
-> **Extend the arm.**
+> Extend the arm
 
 Seems simple. But then you realize you need a little more information. Is the arm powered on? Is it already moving? Is it folded? Is it in the middle of another operation?
 
@@ -54,13 +53,13 @@ You add a few scenarios to your notebook:
 
 The commands themselves aren't particularly complicated. The difficult part is deciding what each command **means in context**.
 
-For example, if the arm is powered off and receives `EXTEND`, you certainly don't want the arm to suddenly spring to life (what if it was powered off as a safety precaution?). If the arm is already extending and receives `FOLD`, you need a deliberate decision about what happens next. Should it stop? Should it reverse? Should it finish its current movement? There isn't a universally correct answer hiding inside the word `FOLD`; **the answer depends on the state of the system.**
+For example, if the arm is powered off and receives `EXTEND`, you certainly don't want the arm to suddenly spring to life (what if it was powered off as a safety precaution?). If the arm is already extending and receives `FOLD`, you need a deliberate decision about what happens next. Should it stop? Should it reverse? Should it finish its current movement? There isn't a universally correct answer hiding inside the word `FOLD`; the answer depends on the **state of the system**.
 
 You stare at your original requirements again.
 
 They tell you **what the arm can do**, but they don't tell you **when it is allowed to do it**.
 
-Ahah! That's what we are missing!
+Ahah! So that's what we are missing!
 
 You start writing down the different conditions the arm can be in:
 
@@ -180,10 +179,12 @@ The documentation for the state machine framework is available at : https://docs
 
 === C Language Features
 
-**TODO**
-* function pointers
-* static
-* enum
+* https://www.learnc.net/c-tutorial/c-enum/[enum]
+** code beautifier
+* https://www.codequoi.com/en/local-global-static-variables-in-c/[static]
+** used to keep track of our states
+* https://pyjamacafe.com/posts/function-pointers/[function pointers]
+** used to tell our state machine how to transition
 
 === Create a simple state machine
 
@@ -277,22 +278,28 @@ Since we are writing this in C, we often instinctively reach for `switch` statem
 
 [source,c]
 ----
-switch (state) {
-    case OFF:
-        // ...
-        break;
+void statemachine_run(void* input)
+{
+    static state = initial_state;
 
-    case IDLE:
-        // ...
-        break;
+    switch (state)
+    {
+        case OFF:
+            // ...
+            break;
 
-    case EXTENDING:
-        // ...
-        break;
+        case IDLE:
+            // ...
+            break;
 
-    case FOLDING:
-        // ...
-        break;
+        case EXTENDING:
+            // ...
+            break;
+
+        case FOLDING:
+            // ...
+            break;
+    }
 }
 ----
 
@@ -324,6 +331,14 @@ switch (state) {
         break;
 
     case FOLDING:
+        // ...
+        break;
+
+    case ROTATE:
+        // ...
+        break;
+
+    case DETACH_HAND:
         // ...
         break;
 
