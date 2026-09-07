@@ -3,6 +3,11 @@
 :imagesdir: imgs
 :toc:
 
+== Setup
+
+1. Go to your local copy of the main branch using `git checkout main`
+2. Create a new branch for lesson 6 using `git checkout -b lesson-3`
+
 == Let's Blink an LED
 . To start with we need to add some bare minimum code to our `main.c` file.
 We need to include `LED.h` and the Zephyr kernel header, then define the main function.
@@ -76,12 +81,12 @@ In addition to the simpler button APIs, we'll also provide a simplified LED API:
 2. You then need to initialize the LED module by calling `LED_init`, also remembering to check the return value
    in case something failed
 3. In your program, there are 3 APIs you can call:
-** `int LED_toggle(led_id led)`: Returns 0 on success, toggles the given LED's state
-** `int LED_set(led_id led, led_state new_state)`: Returns 0 on success, sets the given LED's state to new_state
-      (new_state can be either LED_ON or LED_OFF)
-** `void LED_blink(led_id led, led_frequency frequency)`: No return value, starts blinking the given LED
-      at the specified frequency (LED_1HZ, LED_2HZ, LED_4HZ, LED_8HZ, LED_16HZ). This is a non-blocking function,
-      meaning it returns immediately and handles blinking the LED separately.
+* `int LED_toggle(led_id led)`: Returns 0 on success, toggles the given LED's state
+* `int LED_set(led_id led, led_state new_state)`: Returns 0 on success, sets the given LED's state to new_state
+   (new_state can be either LED_ON or LED_OFF)
+* `void LED_blink(led_id led, led_frequency frequency)`: No return value, starts blinking the given LED
+   at the specified frequency (LED_1HZ, LED_2HZ, LED_4HZ, LED_8HZ, LED_16HZ). This is a non-blocking function,
+   meaning it returns immediately and handles blinking the LED separately.
   You pick which LED to pass these functions by using `LEDx` where x is the LED number (0 - 3 on nRF52840dk)
 
 
@@ -130,7 +135,7 @@ Now that we have gotten one LED to blink on your own try the following:
 
 Create a separate commit for each part of the exercise you complete. When you are done push your changes to your copy of the repository on GitHub.
 ----
-git push origin embedded_primer
+git push origin lesson-3
 ----
 
 == PWM - Pulse Width Modulation
@@ -210,13 +215,6 @@ It's important to note that PWM is used in many applications beyond simple LED b
 * Voltage regulation
 * Buzzer control
 
-=== Setup
-
-1. Fetch the newest version of the EiE repo using `git fetch upstream main`
-2. Go to your local copy of the main branch using `git checkout main`
-3. Sync your local main branch with the EiE repo using `git pull upsream main`
-4. Create a new branch for lesson 6 using `git checkout -b lesson-6`
-
 === EIE LED PWM API
 
 We've added a new API to the LED module that you can now use to turn on an LED at a given PWM duty cycle:
@@ -249,6 +247,7 @@ To use a button you first need to:
    program, including any interrupt settings (explained below).
 
 When it comes to checking if a button is/has been pressed, there are two paradigms:
+
 1. Polling:
    The simple solution. This involves periodically checking whether or not a button is being
    pressed. This is sometimes all you need, but the problem is that you can easily miss events and
@@ -256,12 +255,14 @@ When it comes to checking if a button is/has been pressed, there are two paradig
    into the oven, and then having to come back to check the oven every few minutes to see if it's
    done cooking yet.
 2. Interrupts:
-   The robust solution. This involves writing a special function that gets called when an event
-   (you get to decide what kind of event) occurs to the button. This "interrupt function" is called
-   an *Interrupt Service Routine* (ISR). When the event you specified occurs, the processor will
+   The robust solution. This involves writing a special function, and then putting that function into the post-processing slot of a hardware event trigger. This "interrupt function" is called
+   an *Interrupt Service Routine* (ISR). 
+   * different hardwares have different available events that can trigger an interrupt, but for GPIO inputs (like buttons) the most common is a high/low edge trigger. This means that when the button is pressed or released, it will trigger an interrupt.
+   * When the event you specified occurs, the processor will
    stop whatever it is doing and go execute the associated ISR. Interrupts are crucial for embedded
    systems, as they allow them to respond to random events without wasting processing power by
-   always being active and reading an input. With an interrupt-based program, you can put the
+   always being active and reading an input. 
+   * With an interrupt-based program, you can put the
    processor to sleep, and only do work when an interrupt is triggered, which would cause the
    processor to wake up so it can handle the event. To extend the previous metaphor, this is like
    putting a pie into the oven and then setting a timer - you can go do whatever you want without
@@ -282,7 +283,7 @@ image::BounceScope.png[]
 Notice how the button voltage (high == on, low == off) jumps several times before it ever stabilizes? This is
 what's causing our problem with seeing multiple print statements each time it's clicked! Sometimes the jumps
 are high enough that they cross the voltage threshold needed to count as an "edge to active" and trigger
-the interrupt, but sometimes they don't, and that's why you only it only prints multiple times *sometimes*.
+the interrupt, but sometimes they don't, and that's why it only prints multiple times sometimes.
 
 There's lots of ways you can fix this, but the simplest way boils down to a debounce delay, here's how it works:
 The button gets clicked and bounces, when the first edge to active is hit interrupts get disabled for some
@@ -303,28 +304,23 @@ Here's a rundown of how the APIs we'll provide work:
 1. To use the button APIs, you need to include "BTN.h" in your main.c file
   * Note that here, capital letters in the header name indicate this is a "public" header, and that
      you can use the functions and types declared there freely. You'll notice the implementation file
-     is called "btn.c", this is because it's intended to be private to enfore encapsulation (modularity).
+   is called "btn.c", this is because it's intended to be private to enforce encapsulation (modularity).
      A "private" function is one that you aren't supposed to use since it's not made to be called outside
      a very specific context.
 2. You then need to initialize the button module by calling `BTN_init` somewhere before your main loop,
    you also need to check the return value of `BTN_init` in the event that it failed (remember that
    error codes are negative by convention on Zephyr)
 3. In your program, there are 4 APIs you can call:
-** `bool BTN_is_pressed(btn_id btn)`: Returns true if the given button is currently being pressed
-** `bool BTN_check_clear_pressed(btn_id btn)`: Returns true if the given button has been pressed since you last checked
-      its internal flag, clears the internal flag upon returning
-** `bool BTN_check_pressed(btn_id btn)`: Returns true if the given button has been pressed since you last checked
-      its internal flag, does not clear the internal flag upon returning
-** `void BTN_clear_pressed(btn_id btn)`: Returns nothing, clears the internal state flag of the given button
+* `bool BTN_is_pressed(btn_id btn)`: Returns true if the given button is currently being pressed
+* `bool BTN_check_clear_pressed(btn_id btn)`: Returns true if the given button has been pressed since you last checked
+   its internal flag, clears the internal flag upon returning
+* `bool BTN_check_pressed(btn_id btn)`: Returns true if the given button has been pressed since you last checked
+   its internal flag, does not clear the internal flag upon returning
+* `void BTN_clear_pressed(btn_id btn)`: Returns nothing, clears the internal state flag of the given button
   You pick which button to pass these functions by using `BTNx` where x is the button number (0 - 3 on nRF52840dk)
 
 `BTN_check_pressed` and `BTN_clear_pressed` are provided to give you more flexibility, but in most
 cases you will find that using either `BTN_is_pressed` or `BTN_check_clear_pressed` will be all that you need.
-
-We wanted you to get a hands-on experience using the buttons as a raw gpio_dt_spec with the
-Zephyr gpio APIs before we gave you our advanced APIs that handle all the complexity internally. This
-is because it's crucial to understanding how buttons are handled at a (somewhat) low level. However
-from now on you can use the simplified APIs that we provide.
 
 ==== Example program:
 

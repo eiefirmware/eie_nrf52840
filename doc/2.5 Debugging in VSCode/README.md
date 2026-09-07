@@ -1,21 +1,24 @@
 # Debugging & VSCode
 
 ## Table of Contents
-- [Debugging & VSCode](#debugging--vscode)
-   - [Table of Contents](#table-of-contents)
-   - [Introduction](#introduction)
-   - [Breakpoint debugging](#breakpoint-debugging)
-      - [Before you start](#before-you-start)
-      - [Opening the debugger](#opening-the-debugger)
-      - [What happens when the debugger starts?](#what-happens-when-the-debugger-starts)
-      - [First breakpoint exercise](#first-breakpoint-exercise)
-   - [Serial debugging](#serial-debugging)
-      - [How does it work?](#how-does-it-work)
-      - [Installing and using the VSCode serial monitor](#installing-and-using-the-vscode-serial-monitor)
-      - [How to use it](#how-to-use-it)
-      - [Exercise: combine serial output with breakpoints](#exercise-combine-serial-output-with-breakpoints)
+- [Debugging \& VSCode](#debugging--vscode)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [Breakpoint debugging](#breakpoint-debugging)
+    - [Before you start](#before-you-start)
+    - [Opening the debugger](#opening-the-debugger)
+    - [What happens when the debugger starts?](#what-happens-when-the-debugger-starts)
+    - [First breakpoint exercise](#first-breakpoint-exercise)
+  - [Serial debugging](#serial-debugging)
+    - [How does it work?](#how-does-it-work)
+    - [Installing and using the VSCode serial monitor](#installing-and-using-the-vscode-serial-monitor)
+    - [How to use it](#how-to-use-it)
+    - [Exercise: combine serial output with breakpoints](#exercise-combine-serial-output-with-breakpoints)
 
+== Setup
 
+1. Go to your local copy of the main branch using `git checkout main`
+2. Create a new branch for lesson 6 using `git checkout -b lesson-2`
 
 ## Introduction
 
