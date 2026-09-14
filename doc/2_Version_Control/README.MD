@@ -36,6 +36,44 @@ This is even more useful when working in groups,
 as all of your work gets stored and managed from a single, universal location,
 but everyone is still able to do anything they want to the files on their own computer.
 
+## Configuring Git
+
+### Personal Access Tokens
+
+GitHub disabled password authentication a while ago.
+Instead of a password, you need to use a "Personal Access Token".
+We can generate one as follows:
+
+1. Run `git config --global user.name '<YOUR_NAME>'` in your terminal
+2. Run `git config --global user.email '<YOUR_GITHUB_EMAIL>'` in your terminal
+3. Run `git config credential.helper 'store'` in your terminal
+4. On GitHub, go to your user settings
+5. Scroll down and select "Developer Settings" from the menu on the left
+6. Select "Personal Access Tokens" from the menu on the left
+7. Select "Tokens (classic)", then "Generate new token (classic)"
+8. Give the token a name like "Git Bash Laptop" or similar
+9. Set the expiration to either "90 days" or "No expiration"
+   1. If you set an expiration, you'll have to repeat this process after the token expires
+10. Check the "repo" tick box
+11. Hit "Generate"
+12. Copy the token from GitHub
+13. From the command line, run your `git push` command again, enter your username as normal, but instead of a password, press `ctrl+shft+V` to paste the access token
+14. Press enter, and everything should work!
+
+### Git Editor
+
+Git needs an editor to use to write commit messages.
+By default git uses the Vi editor, which if you are not familiar with can be hard to use.
+To set your own editor run the following command based on the editor you prefer.
+
+* VScode: `git config --global core.editor "code --wait"`
+* Sublime Text: `git config --global core.editor "subl -n -w"`
+* Notepad++: `git config --global core.editor "'C:/Program Files/Notepad++/notepad++.exe' -multiInst -notabbar -nosession"`
+* Xcode: `git config --global core.editor 'xed -w'`
+* nano: `git config --global core.editor nano`
+
+If you have another preferred editor, you can probably set it as the default if desired.
+
 ## Lesson
 
 The goal of this lesson is to become familiar enough with Git and GitHub to use them effectively throughout EiE.
@@ -134,24 +172,34 @@ In general, a good Git process to follow for EiE is as follows:
 
 Of course, feel free to experiment with different workflows, but always be prepeared to explain what you've done to anyone you're expecting help from!
 
-## Personal Access Tokens
+## Source Control and VSCode
 
-GitHub disabled password authentication a while ago.
-Instead of a password, you need to use a "Personal Access Token".
-We can generate one as follows:
+VSCode has several tools for working with git.
+As mentioned in Lesson 1, you can access the source control view in the activity bar or via `CTRL+SHIFT+G` (`⌘+SHIFT+G` on mac).
+When you open the source control view you will see something similar to the view below where you see files you have changed at the top and the git tree at the bottom
 
-1. Run `git config --global user.name '<YOUR_NAME>'` in your terminal
-2. Run `git config --global user.email '<YOUR_GITHUB_EMAIL>'` in your terminal
-3. Run `git config credential.helper 'store'` in your terminal
-4. On GitHub, go to your user settings
-5. Scroll down and select "Developer Settings" from the menu on the left
-6. Select "Personal Access Tokens" from the menu on the left
-7. Select "Tokens (classic)", then "Generate new token (classic)"
-8. Give the token a name like "Git Bash Laptop" or similar
-9. Set the expiration to either "90 days" or "No expiration"
-   1. If you set an expiration, you'll have to repeat this process after the token expires
-10. Check the "repo" tick box
-11. Hit "Generate"
-12. Copy the token from GitHub
-13. From the command line, run your `git push` command again, enter your username as normal, but instead of a password, press `ctrl+shft+V` to paste the access token
-14. Press enter, and everything should work!
+![Source Control View](imgs/source_control.png)
+
+In the changes view it shows you all files that have been modified since your last commit.
+You can use the plus button next to a file to stage a file, and the back arrow to revert your change.
+If you click on any file it will open a view showing what has changed.
+Finally you can use the Message bar at the top to write your commit message.
+
+While the default source control activity view has a source graph, the Git Graph extension is often more useful.
+You can start it using the `Git Graph` button in the primary side bar of the status bar in VSCode.
+![Git Graph Button](imgs/git_graph_button.png)
+
+Which when opened will open a view similar to below where you can click on any commit to see its full commit message, and the files changed.
+![Git Graph](imgs/git_graph.png)
+
+For a more in depth view as to what these features can do read the
+- [VSCode Source Control Documentation](https://code.visualstudio.com/docs/sourcecontrol/overview)
+- [Git Graph Documentation](https://github.com/mhutchie/vscode-git-graph/wiki)
+
+## Additional Resources
+
+Below are additional resources for learning more about git
+
+* [Git learning videos](https://git-scm.com/videos)
+* [Git Book](https://git-scm.com/book/en/v2)
+* [Git Cheatsheet](https://git-scm.com/cheat-sheet)
