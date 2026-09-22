@@ -2,137 +2,189 @@
 :doctype: article
 :imagesdir: imgs
 :source-highlighter: highlight.js
+:stem: latexmath
 :toc:
 
 == Introduction
 
 In this lesson we are going to start to write more complex embedded programs.
-To help accomplish this we are going to cover a powerful design pattern used in many embedded systems: State machines.
+To help accomplish this we are going to cover a powerful design pattern used in many embedded systems : State machines.
 
-=== What is a State Machine
+A state machine is an exercise in design
 
-A state machine is a way of organizing an event driven system.
-In a state machine we define the system states and how the system transitions between those states.
+=== Why state machines
 
-We often use State transition diagrams to show the states and the transitions between them.
-For example the diagram below shows an example state machine for a traffic light with the criteria for each transition next to the transition arrow.
+You've just got off the phone with Bobby McBob, the director at the CSA, and they've requested a new iteration of the Canadarm for the new upcoming Artemis 26 mission. Apparently, they've decided that you are the person who's going to lead the design and development of it.
+
+There's just one small problem : you've had next to no experience designing robotic arms.
+But that's okay. You've got some time, a decent engineering notebook, and an internet connection. Over the next few days, you start doing your homework. You watch videos of robotic arms moving around in space, read about how spacecraft systems are controlled, and spend far too much time watching videos of robots doing things that look deceptively simple.
+
+Eventually, you start to feel like you might actually know what you're doing.
+
+So you open up your notebook and decide to start with the most important question:
+
+**What does this thing actually need to do?**
+
+You begin with a simple list of requirements:
+
+* The arm must do nothing.
+* The arm must power up.
+* The arm must power down.
+* The arm must extend.
+* The arm must fold.
+
+You look over the list. It's not exactly the most complicated engineering specification you've ever seen, but it's a start. At least you know what the arm needs to be capable of doing. Your first instinct is that the software should be fairly simple : wait for a command, figure out what the command is asking for, and then perform that action.
+
+Before you start writing any code, though, you decide to mentally walk through a few situations. After all, this isn't a little robot on your desk. This arm is going to be attached to a spacecraft, so "we'll figure it out when we get there" probably isn't a great engineering strategy.
+
+You start with the obvious one:
+
+> Extend the arm
+
+Seems simple. But then you realize you need a little more information. Is the arm powered on? Is it already moving? Is it folded? Is it in the middle of another operation?
+
+You add a few scenarios to your notebook:
+
+* The arm is powered off → `EXTEND`
+* The arm is sitting still → `EXTEND`
+* The arm is already extending → `EXTEND`
+* The arm is extending → `FOLD`
+* Something has gone wrong → `EXTEND`
+
+The commands themselves aren't particularly complicated. The difficult part is deciding what each command **means in context**.
+
+For example, if the arm is powered off and receives `EXTEND`, you certainly don't want the arm to suddenly spring to life (what if it was powered off as a safety precaution?). If the arm is already extending and receives `FOLD`, you need a deliberate decision about what happens next. Should it stop? Should it reverse? Should it finish its current movement? There isn't a universally correct answer hiding inside the word `FOLD`; the answer depends on the **state of the system**.
+
+You stare at your original requirements again.
+
+They tell you **what the arm can do**, but they don't tell you **when it is allowed to do it**.
+
+Ahah! So that's what we are missing!
+
+You start writing down the different conditions the arm can be in:
+
+* **OFF** — the arm is powered down.
+* **IDLE** — the arm is powered up and waiting for a command.
+* **EXTENDING** — the arm is currently extending.
+* **FOLDING** — the arm is currently folding.
+
+Now the problem starts to look a little different. Instead of thinking about the arm as a machine that simply receives commands, you're thinking about it as a machine that is **always in some state**.
+
+That gives you a much better question to ask:
+
+> **Given the state the arm is currently in, what is it allowed to do?**
+
+Before we dive deeper, there are two ideas worth considering : the **context** and the **machine**.
+
+[NOTE]
+====
+*What is a context?* A context is the information about the environment or situation that is relevant to the problem at hand.
+
+For example, the context might include things like : Are we on Earth? What's the time of day? Is Bobby crying on the side of the street because his brother stole his ice cream?
+
+There could be many pieces of information in the context. The important thing is that the context should probably contain information that is relevant to the task at hand.
+
+*What is a machine?* A machine is something that processes an input according to some rules and produces an output.
+
+You can think of a simple function:
+
+[source]
+----
+f(x) = x + 1
+1 --> f --> 2
+----
+
+Given an input, the machine produces an output.
+
+A state machine combines these ideas : it processes an input **in the context of the system's current state** and determines what should happen next.
+====
+
+A **state machine** is comprised of two components : the **state (context)** and the **machine**.
+
+The state provides information about the system and its environment, while the machine uses that information, together with its input, to determine what it should output.
+
+Consider :
+
+[stem]
+++++
+\begin{aligned}
+x &= 4 \\
+f(y) &= x + y
+\end{aligned}
+++++
+
+Here, we've explicitly defined the value of stem:[x] as part of our state. Given an input of stem:[y = 1], the machine can use that state to determine its output:
+
+[stem]
+++++
+f(1) = 4 + 1 = 5
+++++
+
+The important idea is that the output isn't determined by the input alone. It is determined by the **input together with the current state**.
+We've just used state to derive an output!
+
+[NOTE]
+====
+Now, of course, if you look back on your mathematical career, you've probably almost never seen a state machine. And that's completely normal because the mathematical functions you're familiar with are what we call **pure** functions, which don't depend on or modify external state. The stateful functions we're trying to create in this lesson are a different kind of beast. But that's a topic for another lesson. :)
+====
+
+This gives us a way to describe the behaviour of a system explicitly : we define the possible states the system can be in and the rules for moving between them. In doing so, we can answer the questions that were missing from our original requirements:
+
+* What states can the system be in?
+* What events can occur?
+* Which events cause a state transition?
+* Which transitions are allowed?
+* What happens when an event isn't allowed?
+
+And this isn't just about making our software easier to organize. For a system like the Canadarm, this is fundamentally about **safety**.
+
+If we design the state machine first, we can inspect the system's behaviour before we've written any software. We can look at a proposed transition and ask whether it makes sense. We can identify situations where the arm could move when it shouldn't, or where an unexpected command could put the system somewhere dangerous.
+
+In other words, we're not relying on the code to somehow "figure out" what is safe. **We're defining the rules first, and then making the code obey those rules.**
+
+There is still plenty to figure out. What exactly causes the arm to leave `EXTENDING`? What should happen if a command isn't valid in the current state? What happens when something goes wrong?
+
+But at least we now have a way to reason about those questions.
+
+The next step is to turn our list of states into a **state transition diagram**. This will let us see, at a glance, which transitions are allowed and which aren't.
+
+Before we apply this to the Canadarm, though, let's look at a much simpler system. The same idea becomes easier to see when there are only a handful of states and transitions to worry about.
+
+=== Basic example
+
+Consider something we encounter every day : **a traffic light**.
 
 image::traffic_light_sm.png[]
 
-=== C Language Features
+Here we have an example of a state transition diagram. Note that we have a set of **nodes (circles)** and **directional edges (arrows)** that connect them based on some condition. Can you see how this diagram could prove useful in aiding engineers in their designs?
 
-The following C language features will be needed for working with state machines in Zephyr
+The goal is to hide all of these transition rules behind a simple interface. The code controlling the arm should be concerned with what happened, not how the state machine decides what to do about it. We want those two responsibilities to remain separate.
 
-==== Function pointers
-
-Before we discuss zephyr's state machine API we need to cover a core concept of the C language that is not covered in the intro to C courses.
-
-When a program is executing the CPU runs through the following 3 stages
-
-1. Fetch the next instruction from the system memory
-2. Decode the instruction
-3. Execute the instruction
-
-During the fetch stage the CPU uses a special register called the Program Counter (PC) which stores the address of the next instruction to be fetched.
-When a function is called the address the Program Counter holds is updated to the address of the first instruction of the function.
-Effectively all a function is is a pointer to the location in memory where the first instruction is.
-
-As a function is just a pointer we can store the corresponding address in a pointer variable and use it to call functions dynamically.
-The following listing declares `function_pointer` as a pointer to the function `f` and calls the function via the pointer
 [source,c]
 ----
-void f(int);
-
-void (*function_pointer)(int) = f;
-function_pointer(10);
+state_machine->run(event);
 ----
 
-You can also use `typedef` to declare a function pointer type
-[source,c]
-----
-typedef void (*func_p_t)(int); // func_p_t is a pointer to a function returning void and taking int as an arg
+The caller reports the event, and the state machine handles the transition.
 
-void f(int);
-func_p_t func_p = f;
-----
+== Getting our hands dirty
 
-We can use function pointers to dynamically call functions or pass functions as arguments to other methods.
-Function pointers that are passed into other APIs are often referred to as callbacks.
-[source,c]
-----
-typedef void (*func_p_t)(int);
-
-void f(int);
-void g(int);
-
-static const func_p_t my_func_array[] = {f, g};
-
-// Example of using function pointers to dynamically call functions
-for (int i=0; i < 2; i++)
-{
-    my_func_array[i](i); // Calls f(0) when i==0 and g(1) when i==1
-}
-
-// Function using a function pointer as a callback
-void foo(func_p_t callback)
-{
-    callback(100);
-}
-----
-
-The zephyr state machine API makes heavy use of function pointers.
-
-==== Static variables and functions
-
-Static variables and functions are heavily used in embedded systems.
-Static variables appear in 2 contexts, as variables within a function and as local variables within a file.
-
-In a function static variables maintain their value between function calls to the function
-[source, c]
-----
-int increment_return(void) {
-    static int x = 0;
-
-    return x++; // The return of increment_return will be incremented by 1 each call.
-                // If x was not declared static then increment_return would always return 0
-}
-----
-
-Static variables that are declared at file scope are only accessible within the file (also referred to as the translation unit) the variable is declared in.
-Similarly to static variables defined functions that are defined static are only available within the translation unit they are defined in.
-In general static function prototypes should be defined at the top of the corresponding source file rather than in a header file.
-
-==== Enum data types
-
-Enumerated types or enums are a user defined type that allow the developer to define and group integer constants.
-The listing below shows an example of a enum defined for colours.
-[source, c]
-----
-typedef enum colour {
-    RED,
-    GREEN,
-    BLUE
-} colour_t;
-
-colour_t colour = RED;
-----
-
-Enums are often used to define integer constants that are related to each other.
-We will use enums to define the different states of state machines.
+Enough with the blabbering.
+Let's start writing our own state machines!
 
 === Zephyr State Machine API
 
 Zephyr provides a framework for creating state machines called the state machine framework.
-The documentation for the state machine framework is available at: https://docs.zephyrproject.org/latest/services/smf/index.html
+The documentation for the state machine framework is available at : https://docs.zephyrproject.org/latest/services/smf/index.html
 
-== Lesson
+=== C Language Features
 
-. First we want to get git to a clean branch off of the tip of main.
-Run `git fetch upstream main` to fetch the latest changes from the upstream branch
-. Then run `git checkout main` to checkout your local copy of the main branch. If this step fails you likely have files from lesson 4 that are not commited. Commit those files to the lesson 4 branch before continuing
-. Next run `git pull upstream main` to get your main branch synced with the upstream branch.
-. At this point you can check you are in the correct spot either using a tool like the vs code Git Graph extension, gitk or by running the command `git log -1 --oneline` which will tell you that you are on the branch main and are also at the tip of upstream/main. Optionally at this point you can run `git push origin main` to syncronize the updates with your fork.
-. At this point you can create a new branch for lesson 5 by running `git checkout -b lesson-5`
+* https://www.learnc.net/c-tutorial/c-enum/[enum]
+** code beautifier
+* https://www.codequoi.com/en/local-global-static-variables-in-c/[static]
+** used to keep track of our states
+* https://pyjamacafe.com/posts/function-pointers/[function pointers]
+** used to tell our state machine how to transition
 
 === Create a simple state machine
 
@@ -168,9 +220,9 @@ Each state should be given a unique name that is descriptive of what the state i
 +
 The second structure is an array that defines the following functions for each state within the `smf_state` struct
 
-* entry: The entry function is called whenever the corresponding state is entered.
-* run: The corresponding states run function is called every time the state machine is updated.
-* exit: The exit function is called whenever the corresponding state is exited.
+* entry : The entry function is called whenever the corresponding state is entered.
+* run : The corresponding states run function is called every time the state machine is updated.
+* exit : The exit function is called whenever the corresponding state is exited.
 
 +
 Zephyr provides the `SMF_CREATE_STATE` macro to easily fill our the `smf_state struct`.
@@ -202,7 +254,6 @@ image::state_function_definitions.png[]
 At this point you should be able to build and flash the board and see the LED blink at about 1 Hz.
 If you haven't already done so commit your changes to the lesson 5 branch
 
-
 == Exercise
 
 Complete the following exercises. Make sure to use git to track your changes.
@@ -212,4 +263,246 @@ Complete the following exercises. Make sure to use git to track your changes.
 +
 image::exercise_sm.png[]
 For each state also print upon entering and exiting the state to the console
-* Rewrite the password lock exercise from lesson 4 using a state machine.
+. Rewrite the password lock exercise from lesson 4 using a state machine.
+. Build your Canadarm!
+
+== Bonus
+
+Everything we've done so far has been about using a state machine. The framework gives us the machinery, and we provide the states, events, and transitions.
+
+But for those curious minds out there : how could we build one ourselves?
+
+=== Design 1 : The humble switch statement
+
+Since we are writing this in C, we often instinctively reach for `switch` statements.
+
+[source,c]
+----
+void statemachine_run(void* input)
+{
+    static state = initial_state;
+
+    switch (state)
+    {
+        case OFF:
+            // ...
+            break;
+
+        case IDLE:
+            // ...
+            break;
+
+        case EXTENDING:
+            // ...
+            break;
+
+        case FOLDING:
+            // ...
+            break;
+    }
+}
+----
+
+As it turns out, this works pretty well for us. A `switch` statement maps almost perfectly onto the way we've been thinking about our state machine. We look at the current state, process the event, and decide what state the machine should move into next.
+
+For a small state machine, this is simple, explicit, and easy to understand. In fact, if Canadarm only had a handful of states, there might not be much reason to build anything more complicated.
+
+But then the requirements start growing.
+
+=== Design 2 : When the switch gets too big
+
+Imagine that Canadarm has gained a few more states. We've added calibration, safety states, emergency stops, different movement modes, and several new failure conditions. Some states can transition into many other states, and some transitions require additional checks before they are allowed.
+
+Our little `switch` statement starts becoming rather large.
+
+[source,c]
+----
+switch (state) {
+    case OFF:
+        // ...
+        break;
+
+    case IDLE:
+        // ...
+        break;
+
+    case EXTENDING:
+        // ...
+        break;
+
+    case FOLDING:
+        // ...
+        break;
+
+    case ROTATE:
+        // ...
+        break;
+
+    case DETACH_HAND:
+        // ...
+        break;
+
+    // many more states...
+}
+----
+
+One of your colleagues looks at the function and says :
+
+> "There has to be a better way to represent all these state transitions."
+
+And they have a point.
+
+The problem isn't that `switch` statements are bad. The problem is that we're using control flow to describe something that is fundamentally a collection of **states and transitions**. Even if we move individual pieces into helper functions, we still have to dig through the code to answer a simple question:
+
+> **What can this state transition to?**
+
+Wouldn't it be nice if we could just look at the data and see it?
+
+=== Design 3 : Let the data describe the machine
+
+Let's go back to our state transition diagram.
+
+At its core, every transition we've drawn can be described by three things:
+
+[source]
+----
+CURRENT STATE + EVENT -> NEXT STATE
+----
+
+For example:
+
+[source]
+----
+OFF       + POWER_ON        -> IDLE
+IDLE      + EXTEND          -> EXTENDING
+IDLE      + FOLD            -> FOLDING
+EXTENDING + EXTEND_COMPLETE -> IDLE
+FOLDING   + FOLD_COMPLETE   -> IDLE
+----
+
+There is something interesting hiding here : our state machine is really just a collection of rules.
+
+So instead of putting every rule inside a giant `switch`, what if we represented those rules directly as data?
+
+[source,c]
+----
+struct transition {
+    enum state current;
+    enum event event;
+    enum state next;
+};
+----
+
+Now we can describe our entire state machine as a collection of transitions.
+
+The code no longer needs to know every possible transition ahead of time. It just needs to look at the current state and the event, find the matching transition, and move to the next state.
+
+We've taken something that was previously expressed as control flow and turned it into data.
+
+And that is a pretty important idea. Once you start representing the rules of your machine as data, you can start building code that knows how to *interpret* those rules for you. In other words, we're getting surprisingly close to having our own little state machine framework.
+
+=== Design 4 : There isn't just one kind of state machine
+
+Of course, this isn't the only way we could build a state machine.
+
+Some state machines are simple and flat, like the one we've been using. Others allow states to contain other states. Some give states actions that run when you enter or leave them. Some process events immediately, while others put events into a queue and process them later.
+
+There are even state machines where the current state isn't quite as simple as a single value. A machine might have several pieces of state working together, or a hierarchy where being in one state implicitly means being in several more specific states underneath it.
+State machines within state machines... *Stateception*, anyone?
+
+These approaches can get quite sophisticated, but they are all built around the same basic idea we've been working with : **the behaviour of the system depends on its current state and the events it receives**.
+
+You don't need to know all of these techniques right now. The interesting thing is simply that the little diagrams we've been drawing are part of a much larger family of ideas.
+
+And if you keep following that thread, you'll eventually run into a rather fancy name for the kind of machine we've been building.
+
+=== Finite automata
+
+A state machine with a finite number of states is called a **finite state machine**, or more formally, a **finite automaton**.
+
+Don't let the name intimidate you. We've already been building one.
+
+Our Canadarm machine has a finite collection of states:
+
+[source]
+----
+OFF
+IDLE
+EXTENDING
+FOLDING
+----
+
+It receives some input, such as an event or command, and uses its current state and the transition rules to determine what happens next.
+
+That's a finite automaton.
+
+The word *finite* is doing some important work here. Our machine has a fixed, finite set of states. We can't suddenly invent a brand-new state halfway through running it. Every possible state is part of the machine's design.
+
+This turns out to be a surprisingly useful limitation. Because the machine has a finite number of states and well-defined transitions, we can reason about its behaviour in ways that become much harder with more general machines. We can ask questions like : *Can a particular state ever be reached? Can the machine get stuck? Is there a sequence of events that leads somewhere unexpected?*
+
+These aren't just theoretical questions. They are exactly the kinds of questions we care about when designing real systems.
+
+But finite automata don't have to control robotic arms. We can use them to recognize patterns too.
+
+Imagine feeding a machine a string of characters one at a time. Instead of telling it to move a motor, we could ask it whether the sequence of characters matches some particular pattern. For example, suppose we wanted to recognize strings containing only digits. Our machine could read one character at a time, move between states as it goes, and eventually tell us whether the input was accepted.
+
+Now, what if we wanted a convenient way to describe those patterns without drawing an entire state transition diagram every time? As it turns out, computer scientists came up with exactly that.
+
+=== Regular expressions
+
+In those hacker movies, have you ever seen a line of gibberish like this?
+
+[source]
+----
+^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+----
+
+It might look like complete nonsense at first, but this is a **regular expression**, or *regex* for short. This particular one describes the general structure of an email address.
+
+You may have seen these strange little patterns before without realizing that, underneath the hood, they have a close relationship with the state machines we've been playing with.
+
+Regular expressions can be represented using finite automata. The machine reads the input one character at a time and moves between states depending on what it sees. Eventually, the machine either reaches an accepting state or determines that the input doesn't match the pattern.
+
+So that innocent-looking regex is, in a sense, describing a little state machine.
+
+And these little machines are everywhere. They're used in text editors, search tools, input validation, log processing, programming languages, and countless other places. You may have been using state machines for years without realizing it.
+
+The really interesting part is that we've now wandered quite far from where we started. We began with a machine that moves an arm, and somehow ended up with machines that can recognize patterns in text.
+
+But there is still one question we haven't answered: **how far can we take this idea?** What happens when a machine needs to keep track of more information than can be represented by a finite set of states?
+
+=== Twenty Thousand Leagues Under the Seas
+
+Good work making it this far, sailor. We're about to dive a little deeper. Eventually, we arrive at the **Turing machine**.
+
+A Turing machine is a mathematical model of computation introduced by Alan Turing in 1936. It still has states and transition rules, much like the machines we've been studying, but it adds something our finite automata don't have : a tape that it can read from and write to. Instead of encoding everything the machine needs to remember into a fixed collection of states, the tape gives it a place to store and manipulate an arbitrary amount of information.
+
+That small addition turns out to be incredibly important. Finite automata are excellent at recognizing patterns, but a Turing machine can use its tape to store information, manipulate it, and perform much more general computations. Despite being an extremely simple theoretical machine, it is powerful enough to model general computation.
+
+And this is where our little voyage comes full circle. We started with a practical problem: how do we describe the behaviour of Canadarm? That led us to state machines, which led us to finite automata, which led us to regular expressions, and eventually to one of the foundational models of computation:
+
+[source]
+----
+Canadarm
+   |
+   v
+state machines
+   |
+   v
+finite automata
+   |
+   v
+regular expressions
+   |
+   v
+Turing machines
+----
+
+That's quite a journey from a few circles and arrows.
+
+[NOTE]
+====
+P.S. If you haven't realized it yet, yes, the device you're using is a giant state machine. You came here to learn about Canadarm and somehow ended up at a Turing machine. :)
+
+P.P.S. This is usually third or fourth year computer science territory. Welcome to the deep end.
+====
