@@ -11,15 +11,6 @@ This module describes the software installation required for the EIE Program. Al
 
 There are different install instructions for Windows, MacOS and Linux. Follow all instructions _Carefully_ to make sure your setup works.
 
-== Github setup
-
-Start with this before proceeding to the OS setup
-
-1. If you don't already have one create a github account. It is strongly recommended to use a professional, but non school email for this and to link your github account on your resume.
-2. Go to the https://github.com/eiefirmware/eie_nrf52840[eie_nRF52840] repository
-3. Above the about information there is a dropdown that says Fork. Click the dropdown and hit create a new fork. This creates a private copy of the repository for you to use
-4. Choose a descriptive name for the repository and hit create fork in the bottom right. You can leave the name as the default eie_nrf52840 if you like
-
 == OS Specific Installation
 
 The following section documents specific instructions for installations for Windows, MacOS and Linux.
@@ -80,13 +71,52 @@ NOTE: This assumes Ubuntu 24.04 but you should be able to adapt this for any lin
 8. Install Astral's UV tool `curl -LsSf https://astral.sh/uv/install.sh | sh`
 ====
 
+== Github setup
+
+Start with this before proceeding to the OS setup
+
+1. If you don't already have one create a github account. It is strongly recommended to use a professional, but non school email for this and to link your github account on your resume.
+2. Go to the https://github.com/eiefirmware/eie_nrf52840[eie_nRF52840] repository
+3. Above the about information there is a dropdown that says Fork. Click the dropdown and hit create a new fork. This creates a private copy of the repository for you to use
+4. Choose a descriptive name for the repository and hit create fork in the bottom right. You can leave the name as the default eie_nrf52840 if you like
+
+=== Configuring Git
+
+We now need to do a few things to configure Git on your computer.
+
+==== Github Authentication
+
+GitHub disabled password authentication a while ago and instead needs some sort of key for authentication.
+
+. Run `git config --global user.name '<YOUR_NAME>'` in your terminal
+. Run `git config --global user.email '<YOUR_GITHUB_EMAIL>'` in your terminal
+. Run `git config credential.helper 'store'` in your terminal
+. Follow github's guide to https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key[generating a ssh key].
+Note: You shouldn't need to follow the instructions to add an ssh key to the ssh-agent.
+. Follow github's guide to https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account#adding-a-new-ssh-key-to-your-account[add a new SSH key to your account].
+. Test that your SSH connection works following https://docs.github.com/en/authentication/connecting-to-github-with-ssh/testing-your-ssh-connection[Github's guide].
+
+==== Git Editor
+
+Git needs an editor to use to write commit messages.
+By default Git uses the Vi editor, which if you are not familiar with can be hard to use.
+To set your own editor run the following command based on the editor you prefer.
+
+* VScode: `git config --global core.editor "code --wait"`
+* Sublime Text: `git config --global core.editor "subl -n -w"`
+* Notepad&#43;+: `git config --global core.editor "'C:/Program Files/Notepad+\+/notepad++.exe' -multiInst -notabbar -nosession"`
+* Xcode: `git config --global core.editor 'xed -w'`
+* nano: `git config --global core.editor nano`
+
+If you have another preferred editor, you can probably set it as the default if desired.
+
 == Configuring the Project
 
 1. Open a new terminal and Change the current directory to your home directory: `cd ~`
 2. Create a new directory for zephyr projects: `mkdir zephyr-projects`
 3. Change the directory to the zephyr projects directory `cd zephyr-projects`
-4. Go to the repo you created during the #github-setup[github setup] and click on the green code button and copy the HTTPS URL. The URL should look something like `https://github.com/<your account>/eie_nrf52840.git` depending on what you named the repository. **DO NOT DOWNLOAD THE CODE AS A ZIP**
-5. Clone the EIE source code `git clone -m <Your Repo Link Here> eie_nrf52840`
+4. Go to the repo you created during the #github-setup[github setup] and click on the green code button and copy the SSH URL. The URL should look something like `git@github.com:<your account>/eie_nrf52840.git` depending on what you named the repository. **DO NOT DOWNLOAD THE CODE AS A ZIP**
+5. Clone the EIE source code `git clone <Your Repo Link Here> eie_nrf52840`
 6. Move into the cloned repo `cd eie_nrf52840`
 7. Sync the UV project `uv sync`
 8. Start the virtual environment `source .venv/bin/activate` or `source .venv/Scripts/activate` on windows
