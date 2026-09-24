@@ -4,6 +4,12 @@
 
 - [Debugging & VSCode](#debugging--vscode)
   - [Table of Contents](#table-of-contents)
+   - [Interpreting build errors and compiler output](#interpreting-build-errors-and-compiler-output)
+      - [Read the output from the top down](#read-the-output-from-the-top-down)
+      - [Example: one error with several messages](#example-one-error-with-several-messages)
+      - [Recognize common kinds of output](#recognize-common-kinds-of-output)
+      - [Examples from Zephyr builds](#examples-from-zephyr-builds)
+      - [Useful strategies](#useful-strategies)
   - [Setup](#setup)
   - [Introduction](#introduction)
   - [Breakpoint debugging](#breakpoint-debugging)
@@ -15,7 +21,136 @@
     - [How does it work?](#how-does-it-work)
     - [Using the VSCode serial monitor](#using-the-vscode-serial-monitor)
     - [How to use it](#how-to-use-it)
-    - [Exercise: combine serial output with breakpoints](#exercise-combine-serial-output-with-breakpoints)
+      - [Exercise: combine serial output with breakpoints](#exercise-combine-serial-output-with-breakpoints)
+      - [Example: finding a null string pointer](#example-finding-a-null-string-pointer)
+   - [References](#references)
+
+## Interpreting build errors and compiler output
+
+Build output can be noisy. Read it from the top down and find the first error before
+investigating later messages. One mistake can produce several follow-on diagnostics.
+### Read the output from the top down
+
+Use this process when a build reports errors or warnings:
+
+1. Find the first line that says `error` or otherwise reports a failed command. Ignore
+    progress messages such as `Building`, `[n/n]`, and linker status messages while
+    locating it.
+2. Read the source location beside the message. It usually includes a file name, line
+    number, and sometimes a column, for example:
+    ```text
+    app/src/main.c:24:9: error: expected ';' before '}' token
+    ```
+3. Open that file and inspect the reported line and the few lines above it. The actual
+    mistake is often just before the highlighted location, such as a missing semicolon,
+    brace, parenthesis, or quotation mark.
+4. Read the explanation after the location. Identify what the compiler expected and
+    what it found instead. This is usually more useful than the final build summary.
+5. Fix one small problem, then build again. Treat the next build as a test of whether
+    your interpretation was correct.
+
+### Example: one error with several messages
+
+The following is a shortened example of compiler output from a Zephyr application:
+
+```text
+[42/143] Building C object app/CMakeFiles/app.dir/src/main.c.obj
+FAILED: app/CMakeFiles/app.dir/src/main.c.obj
+.../app/src/main.c:18:5: error: expected ';' before 'k_msleep'
+   18 |     counter = counter + 1
+      |     ^~~~~~~
+.../app/src/main.c:19:5: error: 'counter' undeclared (first use in this function)
+   19 |     k_msleep(1000);
+      |     ^~~~~~~~
+.../app/src/main.c:19:5: warning: implicit declaration of function 'k_msleep'
+ninja: build stopped: subcommand failed.
+```
+
+Start with line 18. The missing semicolon can make the next line look invalid, so the
+`counter` and `k_msleep` messages may be follow-on diagnostics. Add the semicolon and
+rebuild. If the `k_msleep` warning remains, include `<zephyr/kernel.h>`. The final
+`ninja` message only reports that an earlier command failed; it is not the root cause.
+
+### Recognize common kinds of output
+
+- **Compiler errors** stop a source file from compiling. Common causes are syntax
+   mistakes, undeclared variables, incompatible types, and missing headers.
+- **Linker errors** occur when object files are combined. `undefined reference` usually
+   means an implementation, library, or source file is missing from the build.
+- **Warnings** may expose real bugs even when the build continues. Investigate unused
+   variables, missing return values, implicit conversions, and signed/unsigned
+   comparisons instead of hiding them with a cast or compiler option.
+- **CMake, Kconfig, and device-tree messages** come from Zephyr configuration. Check
+   `CMakeLists.txt`, `prj.conf`, board configuration, or `.dts` files as appropriate.
+
+### Examples from Zephyr builds
+
+Wording varies by Zephyr version and board, but these messages are common:
+
+- **Missing Zephyr header:**
+   ```text
+   fatal error: zephyr/kernel.h: No such file or directory
+   ```
+   Build with `west build` from the application directory and check that the source
+   file is included through the project's CMake setup. Zephyr normally supplies its
+   include paths through CMake, so avoid adding a guessed path.
+- **Missing API declaration:**
+   ```text
+   error: implicit declaration of function 'k_msleep'
+   ```
+   Include the API's header: usually `<zephyr/kernel.h>` for kernel APIs and
+   `<zephyr/sys/printk.h>` for `printk`. Check for an earlier missing-header error too.
+- **Kconfig symbol was not defined:**
+   ```text
+   warning: attempt to assign the value 'y' to the undefined symbol SENSOR
+   ```
+   Check the symbol's spelling and its module or driver `Kconfig` file. It may require
+   a parent option or may not be available for the selected board. Inspect the final
+   configuration in `build/zephyr/.config`.
+- **Device-tree node is unavailable:**
+   ```text
+   error: '__device_dts_ord_...' undeclared
+   ```
+   The code is requesting a device missing from the generated device tree. Check the
+   node's `status`, `compatible` value, pin configuration, and driver setting in
+   `prj.conf`. For an alias or chosen node, verify the overlay name matches the `DT_*`
+   macro.
+- **A device was declared but its driver is not linked:**
+   ```text
+   undefined reference to `__device_dts_ord_...'
+   ```
+   The node is present, but its driver may be disabled or unavailable. Compare its
+   `compatible` value with the driver's Kconfig option, then check the generated
+   device tree and `.config` file.
+- **The firmware is too large:**
+   ```text
+   region `FLASH' overflowed by ... bytes
+   ```
+   The image does not fit in flash. Look for unnecessary features in `prj.conf`, large
+   logging settings, unused source files, or an oversized stack. This is a linker
+   error, so changing C syntax will not solve it.
+- **An application source file was not included:**
+   ```text
+   undefined reference to `my_function'
+   ```
+   The function may be declared in a header but defined in a source file outside the
+   target. Check `app/CMakeLists.txt` and `zephyr_library_sources*` statements.
+
+### Useful strategies
+
+- Read the complete diagnostic, including `note:` lines that identify a declaration
+   or definition.
+- Inspect the surrounding code, then check the reported symbol's spelling, type,
+   headers, and build inclusion.
+- Fix the earliest error and rebuild before making more changes; later messages may
+   disappear.
+- Separate build failures from flashing and runtime failures. A successful build does
+   not prove that the board is connected, firmware was flashed, or behavior is correct.
+- After configuration changes, use a clean rebuild if the output seems stale.
+
+The same top-down habit is useful in the VS Code **Terminal** and **Problems** panels.
+Use the Problems panel to jump to a source location, but use the terminal output when
+you need the full context of the command and the messages that came before it.
 
 ## Setup
 
@@ -173,6 +308,8 @@ like if you already have a preference. We recommend using the VSCode serial moni
 
 1. Open the VSCode Panel, and click on the Serial Monitor tab.
    If the tab is missing, go back to [lesson 1](../1_Getting_Started/getting_started.adoc) and follow the VScode setup instructions.
+   
+   ![VS Code Serial Monitor tab](imgs/SerialMonitorExtension.png)
 6. Open the serial monitor:
    - Select the COM port that your dev board is plugged into (it will say "JLink" oEmbedded_Primer/embedded_primer.adocr "Segger" in the port name)
    - Set the baud rate to 115200
@@ -213,6 +350,41 @@ Record what you observe. In particular, note that a breakpoint stops the process
 `printk` statements do not run until you continue or step the program. A breakpoint can also
 change the timing of a program, which matters for timing-sensitive code.
 
+### Example: finding a null string pointer
+
+The debugger can reveal problems that are difficult to understand from serial output alone.
+For example, this code intends to print a useful status message, but leaves `status` as a
+null pointer when the button is not pressed:
+
+```c
+const char *status = NULL;
+
+if (button_pressed) {
+    status = "Button pressed";
+}
+
+printk("Status: %s\n", status);
+```
+
+Depending on the C library and console implementation, printing a null `%s` argument may
+display `(null)`, print unexpected text, or cause a fault. If the expected output is
+`Status: Idle`, the serial output tells you that something is wrong but not why.
+
+To investigate it:
+
+1. Place a breakpoint on the `printk` line.
+2. Start the debugger and inspect `status` in the **Variables** panel.
+3. Check the **Call Stack** to confirm that execution reached the print statement from the
+   expected path.
+4. Step backward through the conditional logic or move the breakpoint to the assignment
+   and check whether `button_pressed` has the value you expect.
+5. Fix the missing default value, for example by initializing `status` to `"Idle"`, then
+   rebuild, flash, and compare the serial output.
+
+The important observation is that the debugger shows the pointer value directly. A null
+pointer is a program-state problem; changing the `printk` format string only hides the
+symptom.
+
 ## Challenge Exercise
 
 Run
@@ -236,3 +408,8 @@ By <a href="//commons.wikimedia.org/w/index.php?title=User:Lasindi&amp;action=ed
 In `main.c` you will find a program that is creating a linked list, adding, and removing data from it, and printing the list to the console.
 However, if you try to build and flash the program you will find the program hard faults.
 Use the VSCode debugger to debug this program and make it work.
+
+## References
+
+- [`k_msleep()` Zephyr API documentation](https://docs.zephyrproject.org/latest/doxygen/html/group__thread__apis.html)
+- [`printk()` Zephyr API documentation](https://docs.zephyrproject.org/latest/doxygen/html/printk_8h.html)
