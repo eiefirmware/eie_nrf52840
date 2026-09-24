@@ -20,9 +20,10 @@
   - [Serial debugging](#serial-debugging)
     - [How does it work?](#how-does-it-work)
     - [Using the VSCode serial monitor](#using-the-vscode-serial-monitor)
-    - [How to use it](#how-to-use-it)
+      - [How to use it](#how-to-use-it)
       - [Exercise: combine serial output with breakpoints](#exercise-combine-serial-output-with-breakpoints)
       - [Example: finding a null string pointer](#example-finding-a-null-string-pointer)
+   - [Challenge Exercise](#challenge-exercise)
    - [References](#references)
 
 ## Interpreting build errors and compiler output
@@ -310,8 +311,8 @@ like if you already have a preference. We recommend using the VSCode serial moni
    If the tab is missing, go back to [lesson 1](../1_Getting_Started/getting_started.adoc) and follow the VScode setup instructions.
    
    ![VS Code Serial Monitor tab](imgs/SerialMonitorExtension.png)
-6. Open the serial monitor:
-   - Select the COM port that your dev board is plugged into (it will say "JLink" oEmbedded_Primer/embedded_primer.adocr "Segger" in the port name)
+2. Open the serial monitor:
+   - Select the COM port that your dev board is plugged into. It will include `JLink` or `Segger` in the port name.
    - Set the baud rate to 115200
    - Select "Start Monitoring"
    ![Serial Monitor settings](imgs/SerialMonitorSettings.png)

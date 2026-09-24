@@ -3,20 +3,12 @@
 :imagesdir: imgs
 :toc:
 
-TODO: add a note to create a new branch for this lesson and push your changes to it when you are done
-
-TODO: no need to fetch upstream?
-=== Setup
-
-1. Fetch the newest version of the EiE repo using `git fetch upstream main`
-2. Go to your local copy of the main branch using `git checkout main`
-3. Sync your local main branch with the EiE repo using `git pull upsream main`
-4. Create a new branch for lesson 6 using `git checkout -b lesson-6
-
 == Setup
 
-1. Go to your local copy of the main branch using `git checkout main`
-2. Create a new branch for lesson 6 using `git checkout -b lesson-3`
+1. Fetch the newest version of the EiE repository using `git fetch upstream main`.
+2. Switch to the local main branch using `git checkout main`.
+3. Update it from the EiE repository using `git pull upstream main`.
+4. Create a branch for this lesson using `git checkout -b lesson-4`.
 
 == EiE LED APIs
 
@@ -39,7 +31,7 @@ visual examples.
 . To start with we need to add some bare minimum code to our `main.c` file.
 We need to include `LED.h` and the Zephyr kernel header, then define the main function.
 In the main function we will create an infinite while loop where our code will run.
-This is a common pattern in embedded systems where there is no operating system to return to, so the application runs forever and main never returns.
+This is a common embedded-systems pattern: the application keeps running and does not return from `main`.
 +
 image::main_minimum.svg[]
 At this point the application should build but won't do anything.
@@ -86,7 +78,7 @@ We will use the Zephyr `k_msleep` function which puts the processor to sleep for
 In general in embedded systems we want the processor to be asleep as much as possible to save power.
 When asleep the microcontroller puts the processor in a low power state while keeping peripherals like timers running to wake the processor up when it needs to do something.
 After adding the delay the code should look like this and the LED should blink.
-\+
++
 image::main_led_toggle_sleep.svg[]
 . Now we can build and flash the application to the board again and the LED should blink once per second.
 +
@@ -108,7 +100,7 @@ TODO: move this down to the PWM section and add a note that it uses PWM internal
 
 Create a separate commit for each part of the exercise you complete. When you are done push your changes to your copy of the repository on GitHub.
 ----
-git push origin lesson-3
+git push origin lesson-4
 ----
 
 == PWM - Pulse Width Modulation
@@ -201,12 +193,15 @@ frequency of 50 Hz. The LED will continue running at the given duty cycle until 
 
 Here is an example of how the LED PWM API should be used:
 
-TODO: make this screenshot and example not use buttons
+This example fades `LED0` from off to full brightness and back again automatically. It does not
+require the button API, so it can be completed before the Buttons section.
 
-image::ExampleMain.png[]
+image::pwm_fade_example.svg[]
 
-You should recreate this and see what happens when you click BTN0 enough times for the LED to cycle through all
-brightnesses a few times. What do you notice about how much the brightness increases between 0 - 50% vs 50 - 100%?
+Recreate the program and observe the LED as its duty cycle changes in 10% steps. The LED is
+fully on at 100% and off at 0%. Notice whether the perceived brightness changes evenly between
+0 - 50% and 50 - 100%. Try changing `STEP_DELAY_MS` or the duty-cycle step size and observe
+how the fade changes.
 
 == Buttons
 
@@ -214,41 +209,14 @@ Buttons are one of the core ways to get input from a user, and are one of the mo
 can interact with any computer based system.
 
 === How do you use a button?
-TODO: fix paragraph whitespace syntax below
-TODO: don't mention anything about device tree in this lesson
 
-TODO: don't mention interrupts in this lesson, just polling
+This lesson uses polling: the program checks the button state at regular intervals. Polling is
+simple to understand, but the program can miss a short press if it checks too slowly.
 
-To use a button you first need to:
-1. Initialize it:
-   This involves using the buttons' device tree identifier to fetch key information
-   to populate a gpio_dt_spec struct representing the button
-2. Configure it:
-   This involves setting the characteristics of how you want the button to behave during the
-   program, including any interrupt settings (explained below).
+The alternative to polling is using interrupts, where the hardware notifies the program immediately when the button state changes. This approach can be more efficient and responsive, but it is also more complex to implement correctly. This will be covered more in a future lesson.
 
-When it comes to checking if a button is/has been pressed, there are two paradigms:
-
-1. Polling:
-   The simple solution. This involves periodically checking whether or not a button is being
-   pressed. This is sometimes all you need, but the problem is that you can easily miss events and
-   that you constantly have to read the button input. To use a metaphor, this is like putting a pie
-   into the oven, and then having to come back to check the oven every few minutes to see if it's
-   done cooking yet.
-2. Interrupts:
-   The robust solution. This involves writing a special function, and then putting that function into the post-processing slot of a hardware event trigger. This "interrupt function" is called
-   an *Interrupt Service Routine* (ISR). 
-   * different hardwares have different available events that can trigger an interrupt, but for GPIO inputs (like buttons) the most common is a high/low edge trigger. This means that when the button is pressed or released, it will trigger an interrupt.
-   * When the event you specified occurs, the processor will
-   stop whatever it is doing and go execute the associated ISR. Interrupts are crucial for embedded
-   systems, as they allow them to respond to random events without wasting processing power by
-   always being active and reading an input. 
-   * With an interrupt-based program, you can put the
-   processor to sleep, and only do work when an interrupt is triggered, which would cause the
-   processor to wake up so it can handle the event. To extend the previous metaphor, this is like
-   putting a pie into the oven and then setting a timer - you can go do whatever you want without
-   needing to constantly check the pie, and then when it's done you get alerted and can go deal
-   with it.
+The EiE button APIs below provide the polling interface used by the exercises. They also keep
+track of button presses so the main loop can check for an event without reading hardware details.
 
 === Button bouncing
 
@@ -261,18 +229,12 @@ image::BounceScope.png[]
 (Image from: https://hackaday.com/2015/12/09/embed-with-elliot-debounce-your-noisy-buttons-part-i/ which is an
   excellent source on button bouncing and how to debounce.)
 
-Notice how the button voltage (high == on, low == off) jumps several times before it ever stabilizes? This is
-what's causing our problem with seeing multiple print statements each time it's clicked! Sometimes the jumps
-are high enough that they cross the voltage threshold needed to count as an "edge to active" and trigger
-the interrupt, but sometimes they don't, and that's why it only prints multiple times sometimes.
+Notice how the button voltage jumps several times before it stabilizes? Those rapid changes can
+make one press look like several presses when the program polls the input.
 
-There's lots of ways you can fix this, but the simplest way boils down to a debounce delay, here's how it works:
-The button gets clicked and bounces, when the first edge to active is hit interrupts get disabled for some
-debounce delay (typically between 10 - 50ms). After the delay is over, they get turned back on, and the state of
-the button is checked, if it's high at that point (i.e. the button is pressed) then this counts as a single
-click, and a flag is set somewhere in your program. The strategy here is to wait out the initial instability
-and then check once things have stabilized. Different buttons have different bouncing durations, so it's
-important to keep that in mind when writing a debouncing system.
+A simple polling debounce waits for a short period, typically 10 to 50 ms, and then checks the
+button again. If it is still pressed, count one press. Different buttons have different bounce
+times, so the debounce delay may need adjustment.
 
 Because debouncing buttons can be complicated, we'll provide you with some functions you can use
 that handle debouncing internally. Usually, we refer to one or more functions that give you an
