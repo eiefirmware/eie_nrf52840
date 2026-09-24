@@ -212,3 +212,27 @@ calculation, and a third inside a loop.
 Record what you observe. In particular, note that a breakpoint stops the processor, so later
 `printk` statements do not run until you continue or step the program. A breakpoint can also
 change the timing of a program, which matters for timing-sensitive code.
+
+## Challenge Exercise
+
+Run
+```sh
+git fetch upstream
+```
+and
+```sh
+git checkout linked-list
+```
+
+This branch contains a simple implementation of a doubly linked-list.
+If you are not familiar a linked list is a data structure where each element contains a pointer to the next element of the list.
+In a doubly linked list each element also contains a pointer to the prior element.
+Typically the head and tail node will have their prior and next elements point to null respectively.
+
+The image below shows a doubly linked list
+![](imgs/Doubly-linked-list.svg)
+By <a href="//commons.wikimedia.org/w/index.php?title=User:Lasindi&amp;action=edit&amp;redlink=1" class="new" title="User:Lasindi (page does not exist)">Lasindi</a> - <span class="int-own-work" lang="en">Own work</span>, Public Domain, <a href="https://commons.wikimedia.org/w/index.php?curid=2245165">Link</a>
+
+In `main.c` you will find a program that is creating a linked list, adding, and removing data from it, and printing the list to the console.
+However, if you try to build and flash the program you will find the program hard faults.
+Use the VSCode debugger to debug this program and make it work.
