@@ -1,8 +1,10 @@
 # Debugging & VSCode
 
 ## Table of Contents
-- [Debugging \& VSCode](#debugging--vscode)
+
+- [Debugging & VSCode](#debugging--vscode)
   - [Table of Contents](#table-of-contents)
+  - [Setup](#setup)
   - [Introduction](#introduction)
   - [Breakpoint debugging](#breakpoint-debugging)
     - [Before you start](#before-you-start)
@@ -11,14 +13,14 @@
     - [First breakpoint exercise](#first-breakpoint-exercise)
   - [Serial debugging](#serial-debugging)
     - [How does it work?](#how-does-it-work)
-    - [Installing and using the VSCode serial monitor](#installing-and-using-the-vscode-serial-monitor)
+    - [Using the VSCode serial monitor](#using-the-vscode-serial-monitor)
     - [How to use it](#how-to-use-it)
     - [Exercise: combine serial output with breakpoints](#exercise-combine-serial-output-with-breakpoints)
 
-== Setup
+## Setup
 
 1. Go to your local copy of the main branch using `git checkout main`
-2. Create a new branch for lesson 6 using `git checkout -b lesson-2`
+2. Create a new branch for lesson 3 using `git checkout -b lesson-3`
 
 ## Introduction
 
@@ -65,7 +67,7 @@ installation and use its full path. On Windows, include `.exe` if it is present.
 line in `launch.json` is commented out, so remove the `//` and update the path before starting
 the debugger.
 
-![.vscode/launch.json](images/launch_json_screenshot.png)
+![.vscode/launch.json](imgs/launch_json_screenshot.png)
 
 ### Opening the debugger
 
@@ -74,7 +76,7 @@ the debugger.
 2. Select **Cortex Debug** in the configuration dropdown if it is not already selected.
 3. Click the green **Start Debugging** button, or press `F5`.
 
-![The VS Code Run and Debug view](images/Run&Debug_page.png)
+![The VS Code Run and Debug view](imgs/Run&Debug_page.png)
 
 The first launch may build and flash the application because this configuration runs the
 `Build and Flash app` task before starting the debugger. Wait for that task to finish and for the
@@ -109,7 +111,7 @@ The **Variables** panel shows local and global values, the **Call Stack** panel 
 program reached the current line, and the **Watch** panel lets you track an expression of your
 choice.
 
-![The VS Code Run and Debug view](images/debugger_running.png)
+![The VS Code Run and Debug view](imgs/debugger_running.png)
 
 ### First breakpoint exercise
 
@@ -156,7 +158,7 @@ Now you might be asking: "how do words get converted to bits?" The answer is *AS
 ASCII (American Standard Code for Information Interchange) is an encoding standard for converting
 numbers, Latin alphabet letters and other common symbols to binary, here's a handy table:
 
-![ASCII character table](images/ASCII.png)
+![ASCII character table](imgs/ASCII.png)
 (Table from ZZT32 and is in the public domain)
 
 When you use a debug print statement with a serial interface, it converts the text you give to
@@ -164,24 +166,18 @@ binary and transmits it in order to the receiver, who then decodes it back to te
 standard and displays it to a *serial monitor*. A serial monitor is a program that runs on your
 computer and displays incoming serial data from a specific port.
 
-### Installing and using the VSCode serial monitor
+### Using the VSCode serial monitor
 
 All serial monitors effectively do the same thing, so you're welcome to use any serial monitor you
-like if you already have a preference. Otherwise, it's recommended you follow these steps to use our
-recommended serial monitor:
-1. Open VSCode and click the "Extensions" menu in the left sidebar
-2. Search "@recommended" and make sure "Serial Monitor" by Microsoft is installed, if you don't see it, procede to step 3
-3. Search "Serial Monitor" and install the extension by Microsoft.
-   ![The Serial Monitor extension](images/SerialMonitorExtension.png)
-4. Open the terminal by hovering your mouse near the bottom of VSCode and pulling up once you see
-   the arrow. Alternatively, select the three dots at the top-left of VSCode click
-   "Terminal">"New Terminal" and in the tabs select "SERIAL MONITOR"
-5. Note you may need to restart VSCode or restart extensions to be able to see it as an option
+like if you already have a preference. We recommend using the VSCode serial monitor otherwise.
+
+1. Open the VSCode Panel, and click on the Serial Monitor tab.
+   If the tab is missing, go back to [lesson 1](../1_Getting_Started/getting_started.adoc) and follow the VScode setup instructions.
 6. Open the serial monitor:
-   - Select the COM port that your dev board is plugged into (it will say "JLink" in the port name)
-   - Set the baud rate to 74880
+   - Select the COM port that your dev board is plugged into (it will say "JLink" oEmbedded_Primer/embedded_primer.adocr "Segger" in the port name)
+   - Set the baud rate to 115200
    - Select "Start Monitoring"
-   ![Serial Monitor settings](images/SerialMonitorSettings.png)
+   ![Serial Monitor settings](imgs/SerialMonitorSettings.png)
 
 ### How to use it
 
