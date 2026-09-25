@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="470" viewBox="0 0 1100 470">
+  <rect width="1100" height="470" fill="#002b36"/>
+  <text x="28" y="38" font-family="Consolas, 'Courier New', monospace" font-size="20" fill="#839496" xml:space="preserve">
+    <tspan x="28" dy="0" fill="#268bd2">#include</tspan><tspan fill="#2aa198"> &lt;stdint.h&gt;</tspan>
+    <tspan x="28" dy="28" fill="#268bd2">#include</tspan><tspan fill="#2aa198"> &lt;zephyr/kernel.h&gt;</tspan>
+    <tspan x="28" dy="28" fill="#268bd2">#include</tspan><tspan fill="#2aa198"> &quot;LED.h&quot;</tspan>
+    <tspan x="28" dy="28"> </tspan>
+    <tspan x="28" dy="28" fill="#268bd2">#define</tspan><tspan> STEP_DELAY_MS </tspan><tspan fill="#d33682">100</tspan>
+    <tspan x="28" dy="28"> </tspan>
+    <tspan x="28" dy="28" fill="#268bd2">int</tspan><tspan> main(</tspan><tspan fill="#268bd2">void</tspan><tspan>) {</tspan>
+    <tspan x="28" dy="28">    </tspan><tspan fill="#268bd2">if</tspan><tspan> (</tspan><tspan fill="#b58900">LED_init</tspan><tspan>() != </tspan><tspan fill="#d33682">0</tspan><tspan>) {</tspan>
+    <tspan x="28" dy="28">        </tspan><tspan fill="#268bd2">return</tspan><tspan> </tspan><tspan fill="#d33682">0</tspan><tspan>;</tspan>
+    <tspan x="28" dy="28">    }</tspan>
+    <tspan x="28" dy="28"> </tspan>
+    <tspan x="28" dy="28">    </tspan><tspan fill="#268bd2">while</tspan><tspan> (</tspan><tspan fill="#d33682">1</tspan><tspan>) {</tspan>
+    <tspan x="28" dy="28">        </tspan><tspan fill="#268bd2">for</tspan><tspan> (uint8_t duty_cycle = </tspan><tspan fill="#d33682">0</tspan><tspan>; duty_cycle &lt;= </tspan><tspan fill="#d33682">100</tspan><tspan>; duty_cycle += </tspan><tspan fill="#d33682">10</tspan><tspan>) {</tspan>
+    <tspan x="28" dy="28">            </tspan><tspan fill="#b58900">LED_pwm</tspan><tspan>(</tspan><tspan fill="#cb4b16">LED0</tspan><tspan>, duty_cycle);</tspan>
+    <tspan x="28" dy="28">            </tspan><tspan fill="#b58900">k_msleep</tspan><tspan>(STEP_DELAY_MS);</tspan>
+    <tspan x="28" dy="28">        }</tspan>
+    <tspan x="28" dy="28"> </tspan>
+    <tspan x="28" dy="28">        </tspan><tspan fill="#268bd2">for</tspan><tspan> (int duty_cycle = </tspan><tspan fill="#d33682">100</tspan><tspan>; duty_cycle &gt;= </tspan><tspan fill="#d33682">0</tspan><tspan>; duty_cycle -= </tspan><tspan fill="#d33682">10</tspan><tspan>) {</tspan>
+    <tspan x="28" dy="28">            </tspan><tspan fill="#b58900">LED_pwm</tspan><tspan>(</tspan><tspan fill="#cb4b16">LED0</tspan><tspan>, duty_cycle);</tspan>
+    <tspan x="28" dy="28">            </tspan><tspan fill="#b58900">k_msleep</tspan><tspan>(STEP_DELAY_MS);</tspan>
+    <tspan x="28" dy="28">        }</tspan>
+    <tspan x="28" dy="28">    }</tspan>
+    <tspan x="28" dy="28"> </tspan>
+    <tspan x="28" dy="28">    </tspan><tspan fill="#268bd2">return</tspan><tspan> </tspan><tspan fill="#d33682">0</tspan><tspan>;</tspan>
+    <tspan x="28" dy="28">}</tspan>
+  </text>
+</svg>

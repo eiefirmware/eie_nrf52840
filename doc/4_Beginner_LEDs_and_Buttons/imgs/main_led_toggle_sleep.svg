@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="250" viewBox="0 0 900 250">
+  <rect width="900" height="250" fill="#002b36"/>
+  <text x="28" y="38" font-family="Consolas, 'Courier New', monospace" font-size="22" fill="#839496" xml:space="preserve">
+    <tspan x="28" dy="0" fill="#268bd2">int</tspan><tspan> main(</tspan><tspan fill="#268bd2">void</tspan><tspan>) {</tspan>
+    <tspan x="28" dy="30">    </tspan><tspan fill="#b58900">LED_init</tspan><tspan>();</tspan>
+    <tspan x="28" dy="30"> </tspan>
+    <tspan x="28" dy="30">    </tspan><tspan fill="#268bd2">while</tspan><tspan> (</tspan><tspan fill="#d33682">1</tspan><tspan>) {</tspan>
+    <tspan x="28" dy="30">        </tspan><tspan fill="#b58900">LED_toggle</tspan><tspan>(</tspan><tspan fill="#cb4b16">LED0</tspan><tspan>);</tspan>
+    <tspan x="28" dy="30">        </tspan><tspan fill="#b58900">k_msleep</tspan><tspan>(</tspan><tspan fill="#d33682">500</tspan><tspan>);</tspan>
+    <tspan x="28" dy="30">    }</tspan>
+    <tspan x="28" dy="30">    </tspan><tspan fill="#268bd2">return</tspan><tspan> </tspan><tspan fill="#d33682">0</tspan><tspan>;</tspan>
+    <tspan x="28" dy="30">}</tspan>
+  </text>
+</svg>
