@@ -27,16 +27,15 @@ Follow the relevant instructions for your system.
 +
 [source,powershell]
 ----
-winget install Kitware.CMake Ninja-build.Ninja oss-winget.gperf python Git.Git oss-winget.dtc wget 7zip.7zip nrfutil astral-sh.uv
+winget install Kitware.CMake Ninja-build.Ninja oss-winget.gperf python oss-winget.dtc wget 7zip.7zip nrfutil astral-sh.uv
 ----
    a. You may need to add 7zip to the path
    b. type `python --version` which should say a number >13.0
-4. Force git to install the windows terminal component
+4. Install Git
 +
 [source,powershell]
 ----
-winget upgrade --id Git.Git --exact `
-  --custom "/COMPONENTS=icons,ext,gitlfs,assoc,assoc_sh,consolefont,windowsterminal,scalar"
+winget install --id Git.Git --exact --custom "/COMPONENTS=icons,ext,gitlfs,assoc,assoc_sh,consolefont,windowsterminal,scalar"
 ----
 At this point if you open a new instance of the windows terminal you should be able to select git bash as your shell in the new shell dropdown.
 +
