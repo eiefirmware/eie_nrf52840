@@ -14,6 +14,7 @@ git pull
 
 git push
 - uploads commits to a remote repository
+-u <remote> <branch>
 
 git merge
 - merges another branch into your current branch
@@ -23,3 +24,16 @@ git rebase
 
 git fetch
 - downloads changes from a remote without merging them
+
+git add
+- stages a file/change for the next commit
+
+git status
+- shows the current state of the repo and its files
+
+git log
+- shows the commit history
+- newest commits are shown first.
+
+git diff
+- shows changes that aren't staged yet
