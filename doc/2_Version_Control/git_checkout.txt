@@ -1,0 +1,25 @@
+git commit
+- saves staged changes as a commit
+-m "message" = adds a commit message.
+
+git branch
+- lists branches
+
+git checkout
+switches to a branch
+-b <name> = creates a new branch and switches to it.
+
+git pull
+- gets changes from a remote and merges them into your current branch
+
+git push
+- uploads commits to a remote repository
+
+git merge
+- merges another branch into your current branch
+
+git rebase
+- moves your commits onto another branch.
+
+git fetch
+- downloads changes from a remote without merging them
