@@ -1,0 +1,8 @@
+git commit -m "message": Saves your staged code snapshot to local history with a short description.
+git branch <name>: Creates a new development timeline (omit name to just list all local branches).
+git checkout
+git pull <remote> <branch>: Downloads latest updates from GitHub and immediately merges them into your code.
+git push <remote> <branch>: Sends your local saved snapshots up to GitHub for others to see.
+git merge <branch>: Combines the history and files of another branch into your current active branch.
+git rebase <branch>: Moves your branch's starting point to a newer commit, keeping history linear.
+git fetch<remote> <branch>: Downloads new history to your hidden local database without touching your files.
