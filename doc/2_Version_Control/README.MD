@@ -54,11 +54,14 @@ To do so, we're going to go through a set of lessons and exercises:
          3. `ls` - "list" - Bash command to show contents of the current directory (files beginning with `.` are hidden, like `.git` or `.vscode`)
          4. `ls -a` - "list all" - Bash command to show _all_ contents of the current directory
    2. use `git remote -v` to check that your 'origin' is set to your forked repo and that 'upstream' is set to the eie repo
-      a. it should look like this
-      `origin https://github.com/<username>/eie_nrf52840.git (fetch)
-origin https://github.com/<username>/eie_nrf52840.git (push)
-upstream https://github.com/eiefirmware/eie_nrf52840.git (fetch)
-upstream https://github.com/eiefirmware/eie_nrf52840.git (push)`
+      a. It should look like this
+         ```
+         origin git@github.com:<username>/eie_nrf52840.git (fetch)
+         origin git@github.com:<username>/eie_nrf52840.git (push)
+         upstream git@github.com:eiefirmware/eie_nrf52840.git (fetch)
+         upstream git@github.com:eiefirmware/eie_nrf52840.git (push)
+         ```
+      b. If you don't see the `upstream` options, run `git remote add upstream git@github.com:eiefirmware/eie_nrf52840.git` and check again
    3. Run `git fetch upstream main` then `git pull upstream main`, then finally `git push origin main` to update your fork
    4. Ensure you're on the `main` branch by running `git branch`
       1. In Git Bash, this is also shown in blue text in your terminal when you're inside of a Git repository (you should be!)
