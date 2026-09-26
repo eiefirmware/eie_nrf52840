@@ -23,15 +23,34 @@ Follow the relevant instructions for your system.
 ====
 1. Open the windows terminal application. If you do not have windows terminal installed get it from the https://apps.microsoft.com/detail/9n0dx20hk701[microsoft store]
 2. Verify you have winget installed by running the command `winget --help` in the terminal. If installed help text for the Windows Package Manager should show up. If not installed install https://aka.ms/getwinget[winget]
-3. Use Winget to install dependencies `winget install Kitware.CMake Ninja-build.Ninja oss-winget.gperf python Git.Git oss-winget.dtc wget 7zip.7zip nrfutil astral-sh.uv`.
+3. Use Winget to install dependencies. This should be done in powershell.
++
+[source,powershell]
+----
+winget install Kitware.CMake Ninja-build.Ninja oss-winget.gperf python oss-winget.dtc wget 7zip.7zip nrfutil astral-sh.uv
+----
    a. You may need to add 7zip to the path
-   b. type 'python --version' which should say a number >13.0
-4. Download the latest https://www.segger.com/downloads/jlink/[jLink installer]
+   b. type `python --version` which should say a number >13.0
+4. Install Git
++
+[source,powershell]
+----
+winget install --id Git.Git --exact --custom "/COMPONENTS=icons,ext,gitlfs,assoc,assoc_sh,consolefont,windowsterminal,scalar"
+----
+At this point if you open a new instance of the windows terminal you should be able to select git bash as your shell in the new shell dropdown.
++
+.Windows Teminal Profile Selection Menu. On your system one option should be git bash
+image::windows-terminal-profiles.png[]
++
+Going forward all commands should be run from git bash in the windows terminal or in VSCode.
+You can also set git bash as your default profile if you prefer following https://learn.microsoft.com/en-us/windows/terminal/customize-settings/startup#default-profile[microsoft's instructions] (Recommended)
+5. Download the latest https://www.segger.com/downloads/jlink/[jLink installer]
    a. start the setup process
    b. make sure to check the "Install Legacy USB driver" checkbox
    c. finish the setup process
-5. Open Git bash in the windows terminal
-6. Run `nrfutil install device`
+6. Open Git bash in the windows terminal
+7. Run
+nrfutil install device`
 ====
 
 === MacOS
@@ -40,18 +59,75 @@ Follow the relevant instructions for your system.
 [%collapsible]
 ====
 1. Open a terminal
-2. Install homebrew by running `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
-3. Add the home brew installation to the path. If you have a Apple silicon mac (2020 or newer) run `(echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> ~/.zprofile && source ~/.zprofile`. If you have an intel mac (2020 or older) run `(echo; echo 'eval "$(/usr/local/bin/brew shellenv)"') >> ~/.zprofile && source ~/.zprofile`
-4. Use homebrew to install the required dependencies by running `brew install cmake ninja gperf python3 python-tk ccache qemu dtc libmagic wget openocd`
-5. Add python to the path `(echo; echo 'export PATH="'$(brew --prefix)'/opt/python/libexec/bin:$PATH"') >> ~/.zprofile && source ~/.zprofile`
+2. Install homebrew by running
++
+[source,bash]
+----
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+----
+3. Add the home brew installation to the path. If you have a Apple silicon mac (2020 or newer) run
++
+[source, bash]
+----
+(echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> ~/.zprofile && source ~/.zprofile
+----
+If you have an intel mac (2020 or older) run
++
+[source, bash]
+----
+(echo; echo 'eval "$(/usr/local/bin/brew shellenv)"') >> ~/.zprofile && source ~/.zprofile
+----
+4. Use homebrew to install the required dependencies by running
++
+[source, bash]
+----
+brew install cmake ninja gperf python3 python-tk ccache qemu dtc libmagic wget openocd
+----
+5. Add python to the path
++
+[source, bash]
+----
+(echo; echo 'export PATH="$(brew --prefix)/opt/python/libexec/bin:$PATH"') >> ~/.zprofile && source ~/.zprofile
+----
 6. Download the latest https://www.segger.com/downloads/jlink/[jLink installer] and run through the setup process.
 7. Download https://www.nordicsemi.com/Products/Development-tools/nRF-Util[nRF utils]
-8. Change the directory in your terminal to Downloads `cd ~/Downloads`
-9. Make nrfutils executable `chmod +x nrfutil`
-10. Move nrfutils to your local bin `mv nrfutil ~/.local/bin/`. If this folder does not exist create it `mkdir -p ~/.local/bin` and add it to your path `echo; echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.zprofile && source ~/.zprofile`.
+8. Change the directory in your terminal to Downloads
++
+[source, bash]
+----
+cd ~/Downloads
+----
+9. Make nrfutils executable
++
+[source, bash]
+----
+chmod +x nrfutil
+----
+10. Move nrfutils to your local bin. If this folder does not exist create it
++
+[source, bash]
+----
+mkdir -p ~/.local/bin
+----
+Then add it to your path
++
+[source, bash]
+----
+(echo; echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.zprofile && source ~/.zprofile)
+----
 11. Open a new terminal
-12. Run `nrfutil install device`
-13. Install Astral's UV tool `curl -LsSf https://astral.sh/uv/install.sh | sh`
+12. Run
++
+[source, bash]
+----
+nrfutil install device
+----
+13. Install Astral's UV tool
++
+[source, bash]
+----
+curl -LsSf https://astral.sh/uv/install.sh | sh
+----
 ====
 
 === Linux
@@ -61,19 +137,54 @@ Follow the relevant instructions for your system.
 ====
 NOTE: This assumes Ubuntu 24.04 but you should be able to adapt this for any linux distribution
 
-1. Run `sudo apt install --no-install-recommends git cmake ninja-build gperf ccache dfu-util device-tree-compiler wget python3-dev python3-venv python3-tk xz-utils file make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1`
+1. Run
++
+[source, bash]
+----
+sudo apt install --no-install-recommends git cmake ninja-build gperf ccache dfu-util device-tree-compiler wget python3-dev python3-venv python3-tk xz-utils file make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1
+----
 2. Download the latest https://www.segger.com/downloads/jlink/[jLink installer] and run through the setup process.
 3. Download https://www.nordicsemi.com/Products/Development-tools/nRF-Util[nRF utils]
-4. Change the directory in your terminal to Downloads `cd ~/Downloads`
-5. Make nrfutils executable `chmod +x nrfutil`
-6. Move nrfutils to your local bin `mv nrfutil ~/.local/bin/`. If this folder does not exist create it `mkdir -p ~/.local/bin` and add it to your path `echo; echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.profile && source ~/.profile`.
-7. Run `nrfutil install device`
-8. Install Astral's UV tool `curl -LsSf https://astral.sh/uv/install.sh | sh`
+4. Change the directory in your terminal to Downloads
++
+[source, bash]
+----
+cd ~/Downloads
+----
+5. Make nrfutils executable
++
+[source, bash]
+----
+chmod +x nrfutil
+----
+6. Move nrfutils to your local bin
++
+[source, bash]
+----
+mv nrfutil ~/.local/bin/
+----
+If this folder does not exist create it and add it to your path
++
+[source, bash]
+----
+mkdir -p ~/.local/bin
+(echo; echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.profile && source ~/.profile)
+----
+7. Run
++
+[source, bash]
+----
+nrfutil install device
+----
+8. Install Astral's UV tool
++
+[source, bash]
+----
+curl -LsSf https://astral.sh/uv/install.sh | sh
+----
 ====
 
 == Github setup
-
-Start with this before proceeding to the OS setup
 
 1. If you don't already have one create a github account. It is strongly recommended to use a professional, but non school email for this and to link your github account on your resume.
 2. Go to the https://github.com/eiefirmware/eie_nrf52840[eie_nRF52840] repository
@@ -88,9 +199,38 @@ We now need to do a few things to configure Git on your computer.
 
 GitHub disabled password authentication a while ago and instead needs some sort of key for authentication.
 
-. Run `git config --global user.name '<YOUR_NAME>'` in your terminal
-. Run `git config --global user.email '<YOUR_GITHUB_EMAIL>'` in your terminal
-. Run `git config credential.helper 'store'` in your terminal
+[NOTE]
+====
+In the following section and throughout this course we will occasionally use angle brackets to show what needs to be replaced in a command. In this case you should replace the entire text enclosed by the brackets _including_ the brackets. For example
+[source, bash]
+----
+git config --global user.name '<YOUR_NAME>'
+----
+would become
+[source, bash]
+----
+git config --global user.name 'John Doe'
+----
+====
+
+. Run the following in your terminal:
++
+[source, bash]
+----
+git config --global user.name '<YOUR_NAME>'
+----
+. Run the following in your terminal:
++
+[source, bash]
+----
+git config --global user.email '<YOUR_GITHUB_EMAIL>'
+----
+. Run the following in your terminal:
++
+[source, bash]
+----
+git config --global credential.helper 'store'
+----
 . Follow github's guide to https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key[generating a ssh key].
 Note: You shouldn't need to follow the instructions to add an ssh key to the ssh-agent.
 . Follow github's guide to https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account#adding-a-new-ssh-key-to-your-account[add a new SSH key to your account].
@@ -112,20 +252,86 @@ If you have another preferred editor, you can probably set it as the default if 
 
 == Configuring the Project
 
-1. Open a new terminal and Change the current directory to your home directory: `cd ~`
-2. Create a new directory for zephyr projects: `mkdir zephyr-projects`
-3. Change the directory to the zephyr projects directory `cd zephyr-projects`
+1. Open a new terminal and change the current directory to your home directory:
++
+[source, bash]
+----
+cd ~
+----
+2. Create a new directory for zephyr projects:
++
+[source, bash]
+----
+mkdir zephyr-projects
+----
+3. Change the directory to the zephyr projects directory:
++
+[source, bash]
+----
+cd zephyr-projects
+----
 4. Go to the repo you created during the #github-setup[github setup] and click on the green code button and copy the SSH URL. The URL should look something like `git@github.com:<your account>/eie_nrf52840.git` depending on what you named the repository. **DO NOT DOWNLOAD THE CODE AS A ZIP**
-5. Clone the EIE source code `git clone <Your Repo Link Here> eie_nrf52840`
-6. Move into the cloned repo `cd eie_nrf52840`
-7. Sync the UV project `uv sync`
-8. Start the virtual environment `source .venv/bin/activate` or `source .venv/Scripts/activate` on windows
-9. Initialize the zephyr project `west init -l`
-10. Update west `west update`
-11. Run `west zephyr-export`to create necessary files for cmake to run
-12. Install the required python packages for west `west packages pip --install`
-13. Install the required toolchain `west sdk install --gnu-toolchains arm-zephyr-eabi`
-14. Proceed to #building-and-flashing-the-board[Building and Flashing the Board]
+5. Clone the EIE source code:
++
+[source, bash]
+----
+git clone <Your Repo Link Here> eie_nrf52840
+----
+6. Move into the cloned repo:
++
+[source, bash]
+----
+cd eie_nrf52840
+----
+7. Sync the UV project:
++
+[source, bash]
+----
+uv sync
+----
+8. Start the virtual environment:
++
+[source, bash]
+----
+source .venv/bin/activate
+----
+On Windows, use:
++
+[source, bash]
+----
+source .venv/Scripts/activate
+----
+9. Initialize the zephyr project:
++
+[source, bash]
+----
+west init -l
+----
+10. Update west:
++
+[source, bash]
+----
+west update
+----
+11. Run the following to create the necessary files for cmake to run:
++
+[source, bash]
+----
+west zephyr-export
+----
+12. Install the required python packages for west:
++
+[source, bash]
+----
+west packages pip --install
+----
+13. Install the required toolchain:
++
+[source, bash]
+----
+west sdk install --gnu-toolchains arm-zephyr-eabi
+----
+14. Proceed to <<_building_and_flashing_the_board>>
 
 === Virtual Environments
 
@@ -141,7 +347,17 @@ We installed this tool as part of the virtual environment, so to use it we need 
 There is two ways we can do this.
 
 First we can start the virtual environment in the terminal.
-To do this we run either `source .venv/bin/activate` on Linux and MacOS or `source .venv/Scripts/activate` on Windows from the folder that contains the virtual environment (In our case the eie_nrf52840 directory).
+To do this we run either
+[source, bash]
+----
+source .venv/bin/activate
+----
+on Linux and MacOS or
+[source, bash]
+----
+source .venv/Scripts/activate
+----
+on Windows from the folder that contains the virtual environment (In our case the eie_nrf52840 directory).
 The image below shows an example of this
 
 image::virtual-env.png[]
@@ -151,7 +367,11 @@ After I run the command to activate the virtual environment (notice my terminal 
 We can see the environment is active as the name of the environment, in this case eie-nrf52840, has been pre-pended in parenthesis in front of my terminal prompt.
 Once in the virtual environment running `west -V`, and any subsequent west commands, will work as expected.
 Please note that the rest of the terminal prompt may look different from what is shown above based on your operating system, or terminal preferences.
-Additionally at any point we can exit the virtual environment by running `deactivate`.
+Additionally at any point we can exit the virtual environment by running
+[source, bash]
+----
+deactivate
+----
 If you are using the integrated terminal built into VS Code, it will automatically activate the virtual environment provided you open full project in its own window.
 
 The second way to run tools in the virtual environment is to have uv invoke the virtual environment when we run a command.
