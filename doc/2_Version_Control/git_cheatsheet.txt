@@ -1,0 +1,54 @@
+Git Command Cheatsheet
+
+git commit
+- Saves staged changes as a commit in the local repository.
+- Common usage:
+  git commit -m "message"
+- The -m argument lets you write the commit message directly in the command.
+
+git branch
+- With no arguments, lists all local branches and shows which branch is currently active.
+- Example:
+  git branch
+- With one branch-name argument, creates a new branch.
+- Example:
+  git branch lesson2
+- This is one command where the behavior changes depending on the arguments.
+
+git checkout
+- Switches between branches.
+- Example:
+  git checkout main
+  git checkout lesson2
+- Can also create and switch to a new branch:
+  git checkout -b lesson2
+
+git pull
+- Downloads changes from a remote repository and merges them into the current branch.
+- Example:
+  git pull
+- You can also specify a remote and branch:
+  git pull upstream main
+
+git push
+- Uploads local commits to a remote repository.
+- Example:
+  git push origin main
+- The first argument is usually the remote and the second is the branch.
+
+git merge
+- Combines changes from another branch into the branch you are currently on.
+- Example:
+  git merge lesson2
+
+git rebase
+- Moves or reapplies commits on top of another branch.
+- Example:
+  git rebase main
+- Often used to keep a branch up to date with another branch while maintaining a cleaner history.
+
+git fetch
+- Downloads changes and branch information from a remote repository without merging them into your current branch.
+- Example:
+  git fetch upstream
+- You can then inspect or merge the fetched changes separately.
