@@ -33,8 +33,13 @@ git pull
 git push
 - Uploads local commits to a remote repository.
 - Example:
-  git push origin main
-- The first argument is usually the remote and the second is the branch.
+  git push origin lesson2
+
+- Using -u sets the upstream tracking branch:
+  git push -u origin lesson2
+
+- After the upstream branch has been set, future pushes can usually be done with:
+  git push
 
 git merge
 - Combines changes from another branch into the branch you are currently on.
@@ -51,4 +56,29 @@ git fetch
 - Downloads changes and branch information from a remote repository without merging them into your current branch.
 - Example:
   git fetch upstream
-- You can then inspect or merge the fetched changes separately.
+- You can then inspect or merge the fetched changes separatelygit add
+- Adds changes to the staging area before committing.
+- Example:
+  git add git_cheatsheet.txt
+- To stage all changed files:
+  git add .
+
+git status
+- Shows the current state of the repository.
+- Displays modified files, staged files, untracked files, and the current branch.
+- Example:
+  git status
+
+git log
+- Shows the commit history of the repository.
+- Example:
+  git log
+- A shorter version is:
+  git log --oneline
+
+git diff
+- Shows changes that have been made but not yet staged.
+- Example:
+  git diff
+- To see staged changes:
+  git diff --staged.
