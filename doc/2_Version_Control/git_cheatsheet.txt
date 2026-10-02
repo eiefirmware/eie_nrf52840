@@ -6,3 +6,7 @@ git push
 git merge
 git rebase
 git fetch
+git add
+git status
+git log
+git diff
