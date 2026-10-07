@@ -10,10 +10,6 @@
     "clangd.arguments": ["--header-insertion=never", "--enable-config"],
 
     // Debug settings
-    "cortex-debug.armToolchainPath.windows": "${env:USERPROFILE}\\zephyr-sdk-1.0.1\\gnu\\arm-zephyr-eabi\\bin",
-    "cortex-debug.armToolchainPath.osx": "${env:HOME}/zephyr-sdk-1.0.1/gnu/arm-zephyr-eabi/bin",
-    "cortex-debug.armToolchainPath.linux": "${env:HOME}/zephyr-sdk-1.0.1/gnu/arm-zephyr-eabi/bin",
-    "cortex-debug.armToolchainPrefix": "arm-zephyr-eabi",
     "memory-view.trackDebuggers": [
         "cortex-debug",
         "gdb",
