@@ -29,7 +29,9 @@ Follow the relevant instructions for your system.
 ----
 winget install Kitware.CMake Ninja-build.Ninja oss-winget.gperf python oss-winget.dtc wget 7zip.7zip nrfutil astral-sh.uv
 ----
-   a. You may need to add 7zip to the path
+   a. You may need to add 7zip to the path.
+   Follow the instructions https://stackoverflow.com/a/44272417[here] to do so.
+   By default the install location for 7zip that needs to be added to the path is `C:\Program Files\7-Zip`, but you should double check this location is correct on your computer first.
    b. type `python --version` which should say a number >13.0
 4. Install Git
 +
@@ -389,7 +391,7 @@ For the rest of this lesson and all future lessons we assume you have properly a
 1. If you don't already have a terminal open, open a terminal and navigate to the EIE project directory you cloned
 2. Activate the virtual environment if not already active (see OS specific instructions for how to do so)
 3. Run `west build -b nrf52840dk/nrf52840 app` to build the application
-4. Run `west flash` to flash the board. Note if this is your first time flashing you may need to use
+4. Run `west flash` to flash the board. Note if this is your first time flashing you may need to add the `--recover` flag.
 
 == VSCode Setup
 
