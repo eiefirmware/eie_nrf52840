@@ -156,7 +156,8 @@ you need the full context of the command and the messages that came before it.
 ## Setup
 
 1. Go to your local copy of the main branch using `git checkout main`
-2. Create a new branch for lesson 3 using `git checkout -b lesson-3`
+2. Make sure your main branch is up to date using `git fetch upstream main` and `git pull upstream main`
+3. Create a new branch for lesson 3 using `git checkout -b lesson-3`
 
 ## Introduction
 
