@@ -156,12 +156,18 @@ you need the full context of the command and the messages that came before it.
 ## Setup
 
 1. Go to your local copy of the main branch using `git checkout main`
-2. Create a new branch for lesson 3 using `git checkout -b lesson-3`
+2. Make sure your main branch is up to date using `git fetch upstream main` and `git pull upstream main`
+3. Create a new branch for lesson 3 using `git checkout -b lesson-3`
 
 ## Introduction
 
 This lesson aims to cover two key topics of embedded systems: debugging via serial interface, and debugging using breakpoints. Both these topics are crucial, and you'll probably find yourself using them in some
 way or another for every future lesson!
+
+> [!IMPORTANT]
+> This section is strongly dependent on the VSCode setup from lesson 1.
+> If you skipped this go back and complete it now
+> [Lesson 1](../1_Getting_Started/getting_started.adoc)
 
 ## Breakpoint debugging
 
@@ -178,32 +184,6 @@ Before launching the debugger:
 2. Make sure the board is recognized by the J-Link tools.
 3. Check that the project builds successfully. The debugger uses the ELF file generated at
     `build/zephyr/zephyr.elf`.
-4. Open `.vscode/launch.json` and configure the `gdbPath` property. This property must point to
-    the `arm-zephyr-eabi-gdb` executable installed with your Zephyr SDK.
-
-The path is different depending on your operating system and where you installed the SDK. For
-example, the setting may look similar to one of these:
-
-The path is different depending on your operating system and where you installed the SDK. For
-example, the setting may look similar to one of these:
-
-```jsonc
-// Windows: use either / or escaped backslashes in JSON paths.
-"gdbPath": "C:/path/to/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb.exe"
-
-// Linux
-"gdbPath": "/home/your-name/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb"
-
-// macOS
-"gdbPath": "/Users/your-name/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb"
-```
-
-Do not copy these paths literally. Find the `arm-zephyr-eabi-gdb` file in your own Zephyr SDK
-installation and use its full path. On Windows, include `.exe` if it is present. The existing
-line in `launch.json` is commented out, so remove the `//` and update the path before starting
-the debugger.
-
-![.vscode/launch.json](imgs/launch_json_screenshot.png)
 
 ### Opening the debugger
 
@@ -309,7 +289,7 @@ like if you already have a preference. We recommend using the VSCode serial moni
 
 1. Open the VSCode Panel, and click on the Serial Monitor tab.
    If the tab is missing, go back to [lesson 1](../1_Getting_Started/getting_started.adoc) and follow the VScode setup instructions.
-   
+
    ![VS Code Serial Monitor tab](imgs/SerialMonitorExtension.png)
 2. Open the serial monitor:
    - Select the COM port that your dev board is plugged into. It will include `JLink` or `Segger` in the port name.

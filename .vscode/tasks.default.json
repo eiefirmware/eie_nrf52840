@@ -44,7 +44,39 @@
             "kind": "build",
             "isDefault": true
         }
-    }
+    },
+    {
+        "label": "Debug server",
+        "type": "shell",
+        "command": "uv run west debugserver -r jlink",
+        "problemMatcher": {
+            "pattern": {
+                "regexp":
+                    "^(Info |Warn |Error):(.*)$",
+                "severity": 1,
+                "message": 2
+            },
+            "background": {
+                "activeOnStart": true,
+                "beginsPattern": ".*reset after flashing requested.*",
+                "endsPattern": ".*J-Link GDB server running on port 2331.*",
+            },
+        },
+        "isBackground": true,
+        "runOptions": {
+            "instanceLimit": 1,
+            "instancePolicy": "terminateOldest"
+        },
+        "presentation": {
+            "reveal": "silent",
+            "close": true,
+        },
+    },
+    {
+        "label": "Stop Debugserver",
+        "type": "process",
+        "command": "${command:workbench.action.tasks.terminate}",
+    },
 ],
   "inputs": [
     {
