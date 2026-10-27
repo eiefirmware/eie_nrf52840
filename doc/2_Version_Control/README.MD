@@ -53,12 +53,15 @@ To do so, we're going to go through a set of lessons and exercises:
          2. `pwd` - "print working directory" - Bash command to check which directory the terminal is currently in
          3. `ls` - "list" - Bash command to show contents of the current directory (files beginning with `.` are hidden, like `.git` or `.vscode`)
          4. `ls -a` - "list all" - Bash command to show _all_ contents of the current directory
-   2. use 'git remote -v' to check that your 'origin' is set to your forked repo and that 'upstream' is set to the eie repo
-      a. it should look like this
-      `origin https://github.com/<username>/eie_nrf52840.git (fetch)
-origin https://github.com/<username>/eie_nrf52840.git (push)
-upstream https://github.com/eiefirmware/eie_nrf52840.git (fetch)
-upstream https://github.com/eiefirmware/eie_nrf52840.git (push)`
+   2. use `git remote -v` to check that your 'origin' is set to your forked repo and that 'upstream' is set to the eie repo
+      a. It should look like this
+         ```
+         origin git@github.com:<username>/eie_nrf52840.git (fetch)
+         origin git@github.com:<username>/eie_nrf52840.git (push)
+         upstream git@github.com:eiefirmware/eie_nrf52840.git (fetch)
+         upstream git@github.com:eiefirmware/eie_nrf52840.git (push)
+         ```
+      b. If you don't see the `upstream` options, run `git remote add upstream git@github.com:eiefirmware/eie_nrf52840.git` and check again
    3. Run `git fetch upstream main` then `git pull upstream main`, then finally `git push origin main` to update your fork
    4. Ensure you're on the `main` branch by running `git branch`
       1. In Git Bash, this is also shown in blue text in your terminal when you're inside of a Git repository (you should be!)
@@ -134,24 +137,34 @@ In general, a good Git process to follow for EiE is as follows:
 
 Of course, feel free to experiment with different workflows, but always be prepeared to explain what you've done to anyone you're expecting help from!
 
-## Personal Access Tokens
+## Source Control and VSCode
 
-GitHub disabled password authentication a while ago.
-Instead of a password, you need to use a "Personal Access Token".
-We can generate one as follows:
+VSCode has several tools for working with Git.
+As mentioned in Lesson 1, you can access the source control view in the activity bar or via `CTRL+SHIFT+G` (`⌘+SHIFT+G` on mac).
+When you open the source control view you will see something similar to the view below where you see files you have changed at the top and the Git tree at the bottom
 
-1. Run `git config --global user.name '<YOUR_NAME>'` in your terminal
-2. Run `git config --global user.email '<YOUR_GITHUB_EMAIL>'` in your terminal
-3. Run `git config credential.helper 'store'` in your terminal
-4. On GitHub, go to your user settings
-5. Scroll down and select "Developer Settings" from the menu on the left
-6. Select "Personal Access Tokens" from the menu on the left
-7. Select "Tokens (classic)", then "Generate new token (classic)"
-8. Give the token a name like "Git Bash Laptop" or similar
-9. Set the expiration to either "90 days" or "No expiration"
-   1. If you set an expiration, you'll have to repeat this process after the token expires
-10. Check the "repo" tick box
-11. Hit "Generate"
-12. Copy the token from GitHub
-13. From the command line, run your `git push` command again, enter your username as normal, but instead of a password, press `ctrl+shft+V` to paste the access token
-14. Press enter, and everything should work!
+![Source Control View](imgs/source_control.png)
+
+In the changes view it shows you all files that have been modified since your last commit.
+You can use the plus button next to a file to stage a file, and the back arrow to revert your change.
+If you click on any file it will open a view showing what has changed.
+Finally you can use the Message bar at the top to write your commit message.
+
+While the default source control activity view has a source graph, the Git Graph extension is often more useful.
+You can start it using the `Git Graph` button in the primary side bar of the status bar in VSCode.
+![Git Graph Button](imgs/git_graph_button.png)
+
+This will open a view similar to below where you can click on any commit to see its full commit message, and the files changed.
+![Git Graph](imgs/git_graph.png)
+
+For a more in depth view as to what these features can do read the
+- [VSCode Source Control Documentation](https://code.visualstudio.com/docs/sourcecontrol/overview)
+- [Git Graph Documentation](https://github.com/mhutchie/vscode-git-graph/wiki)
+
+## Additional Resources
+
+Below are additional resources for learning more about Git
+
+* [Git learning videos](https://git-scm.com/videos)
+* [Git Book](https://git-scm.com/book/en/v2)
+* [Git Cheatsheet](https://git-scm.com/cheat-sheet)

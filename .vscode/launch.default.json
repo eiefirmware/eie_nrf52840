@@ -7,13 +7,15 @@
         {
             "name": "Cortex Debug",
             "cwd": "${workspaceFolder}",
-            "preLaunchTask": "Build and Flash app",
+            "preLaunchTask": "Debug server",
+            "postDebugTask": "Stop Debugserver",
             "executable": "./build/zephyr/zephyr.elf",
             "request": "launch",
             "type": "cortex-debug",
             "device": "nRF52840_xxAA",
             "runToEntryPoint": "main",
-            "servertype": "jlink",
+            "servertype": "external",
+            "gdbTarget": "localhost:2331",
             // "gdbPath": "${env:ZEPHYR_SDK_PATH}/gnu/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb",
             "svdFile": "${workspaceFolder}/../modules/hal/nordic/nrfx/bsp/stable/mdk/nrf52840.svd",
             "liveWatch": {

@@ -11,7 +11,6 @@
     "zixuanwang.linkerscriptm",
     "spadin.config-defaults",
     "mhutchie.git-graph",
-    "eamodio.gitlens",
     "ms-vscode.vscode-serial-monitor",
     "mcu-debug.memory-view",
     "mcu-debug.peripheral-viewer",

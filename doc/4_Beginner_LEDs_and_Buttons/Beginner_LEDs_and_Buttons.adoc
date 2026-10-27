@@ -1,0 +1,289 @@
+= Basic GPIO, LED & Buttons
+:doctype: article
+:imagesdir: imgs
+:toc:
+:source-highlighter: highlight.js
+:stem: latexmath
+
+== Introduction
+
+One of the most basic things you can do with an embedded system is output data to a Light Emitting Diode (LED) or input data from a button.
+To do this we can use the General Purpose Input Output (GPIO) peripherals of the microcontroller to input or output data.
+In this lesson we will use some basic APIs created for EIE to interact with the buttons and LEDs on the nRF52840 dev kit.
+In a future lesson we will go into more depth on how the GPIO peripheral works and how we can interact with it directly.
+
+=== Light Emitting Diodes
+
+Light emitting diodes or LEDs for short are often used in lighting applications or status indicators in embedded systems.
+They are particularly useful in the later application as they can provide a visual indication to a user that something happened and are much simpler, cheaper and use less power compared to something like a screen.
+The nRF52840 dev kit has 4 LEDs labeled LED 1 to 4 which we will be using for this lesson.
+
+=== Pulse Width Modulation
+
+Because LEDs are a type of diode they exhibit a non linear relationship between voltage and current.
+One consequence of this is power and light intensity does not scale linearly with respect to voltage, making it difficult to control brightness.
+
+A solution to this problem is Pulse Width Modulation or PWM.
+
+==== Duty Cycle
+
+First it is important to understand duty cycle.
+The duty cycle of a signal describes the amount of time a signal is high relative to the signal period.
+
+.Examples of duty cycle. Source: Wikipedia
+image::Duty_Cycle_Examples.png[]
+
+==== Using PWM
+
+In pulse width modulation, we change or modulate the amount of time a device is turned on to control the power delivered.
+
+For example, if you send a series of 1V pulses with a 10ms period and a 5ms on-time, the average
+voltage seen by the load will be 0.5V! The ratio of the pulse width to the pulse period is 5ms / 10ms,
+or 0.5 in this case, therefore the average voltage seen by the load is 0.5 * 1V or 0.5V (as seen below)
+
+image::PWM_1V_10ms_50.png[]
+
+This PWM setting has a duty cycle of 50 %
+
+Take another example, let's reduce the pulse width to just 20% of the pulse's overall period. With
+this setup, our average load voltage should be 2ms / 10ms * 1V or 0.2V:
+
+image::PWM_1V_10ms_20.png[]
+
+This PWM setting has a duty cycle of 20%
+
+For one last example, let's increase the pulse width all the way to 80% of the pulse's overall
+period. In this case, the average load voltage will be 8ms / 10ms * 1V or 0.8V!
+
+image::PWM_1V_10ms_80.png[]
+
+This PWM setting has a duty cycle of 80%
+
+As you can see, we can vary the average voltage seen by the load just by varying how long the pulse
+is on for! We can even add a capacitor to the output of the PWM to get a smoothed signal (a true analog signal),
+note that this isn't always done and can delay the response of the signal:
+
+image::PWM_1V_10ms_50_smoothed.png[]
+
+Note: We will not be using a capacitor for our PWM LEDs
+
+=== Buttons
+
+Buttons are one of the core ways to get input from a user, and are one of the most basic ways a user
+can interact with any computer based system.
+The nRF52840 dev kit has 4 buttons labeled BUTTON 1 to 4 which we will be using for this lesson.
+
+==== How do you use a button?
+
+This lesson uses polling: the program checks the button state at regular intervals. Polling is
+simple to understand, but the program can miss a short press if it checks too slowly.
+
+The alternative to polling is using interrupts, where the hardware notifies the program immediately when the button state changes. This approach can be more efficient and responsive, but it is also more complex to implement correctly. This will be covered more in a future lesson.
+
+The EiE button APIs below provide the polling interface used by the exercises. They also keep
+track of button presses so the main loop can check for an event without reading hardware details.
+
+==== Button bouncing
+
+Unfortunately, buttons aren't perfect and the metal contacts inside of them aren't exactly flat. Because of this,
+when you click a button, the metal contacts "bounce" very quickly several times before they make consistent contact.
+Using an oscilloscope, we can see exactly what this looks like:
+
+.Image from: https://hackaday.com/2015/12/09/embed-with-elliot-debounce-your-noisy-buttons-part-i/ which is an excellent source on button bouncing and how to debounce.
+image::BounceScope.png[]
+
+Notice how the button voltage jumps several times before it stabilizes? Those rapid changes can
+make one press look like several presses when the program polls the input.
+
+A simple polling debounce waits for a short period, typically 10 to 50 ms, and then checks the
+button again. If it is still pressed, count one press. Different buttons have different bounce
+times, so the debounce delay may need adjustment.
+
+Because debouncing buttons can be complicated, we'll provide you with some functions you can use
+that handle debouncing internally. Usually, we refer to one or more functions that give you an
+interface into a module as "APIs" or *Application Programmer Interfaces*.
+
+== Lesson
+
+=== Setup
+
+1. Fetch the newest version of the EiE repository using `git fetch upstream main`.
+2. Switch to the local main branch using `git checkout main`.
+3. Update it from the EiE repository using `git pull upstream main`.
+4. Create a branch for this lesson using `git checkout -b lesson-4`.
+
+At this point if you open the `main.c` file in `app/src` you should have the following basic application that does nothing.
+
+image::sample_main.png[]
+
+The application should build but won't do anything.
+[source, sh]
+----
+west build -b nrf52840dk/nrf52840 app
+----
+
+=== EIE LED APIs
+
+The EIE LED apis are included with the `LED.h` header file.
+This header contains the following functions
+
+- {empty}
++
+[source, c]
+----
+int LED_init();
+----
+Needs to be called before using any other LED API's.
+This is already done for you in the sample `main.c`.
+- {empty}
++
+[source, c]
+----
+int LED_toggle(led_id led);
+----
+Changed the specified LED from on to off or vice versa
+
+- {empty}
++
+[source, c]
+----
+int LED_set(led_id led, led_state new_state);
+----
+Changes the specified LED state to the specified new state
+- {empty}
++
+[source, c]
+----
+int LED_pwm(led_id led, uint8_t duty_cycle);
+----
+Sets the specified LED to be on with a given duty cycle between 0 and 100
+- {empty}
++
+[source, c]
+----
+void LED_blink(led_id led, led_frequency frequency);
+----
+Sets the specified LED to blink at a given frequency.
+
+The `led_id`, `led_state` and `led_frequency` are all enums data types.
+`led_id` defines `LED0`, `LED1`, `LED2`, `LED3` which correspond to LED 1 to 4 on the board respectively.
+`led_state` defines `LED_OFF` and `LED_ON`.
+`led_frequency` defines `LED_1HZ`, `LED_2HZ`, `LED_4HZ`, `LED_8HZ`, and `LED_16HZ` as available frequencies the LED can be blinked at.
+
+=== Let's Blink an LED
+
+We can now get an LED to blink simply using the LED blink API.
+
+image::LED_basic_blink.png[]
+
+If we now build and flash you should see LED 1 blinking on your board once per second.
+[source, sh]
+----
+west build -b nrf52840dk/nrf52840 app
+----
+and
+[source, sh]
+----
+west flash
+----
+
+At this point you should add your `main.c` file to the git staging area and commit the change.
+Use a commit message like "LED blinking"
+
+NOTE: The `k_msleep` function pauses execution of the program for the specified time in milliseconds.
+By default with the sample main this will stop execution for 1 millisecond.
+We will discuss this API more in future lessons, however feel free to adjust the sleep time as needed for this lesson.
+
+We can also use some of the other LED functions
+
+image::LED_functions.png[]
+
+At this point you will see LED 1 continue to blink, LED 2 be solid on, LED 3 blink with a bit of a fade (this may be easier to see if you slow down execution by increasing the sleep time), and LED 4 blink at a faster rate than LED 1.
+Add this change to git and commit.
+
+=== EiE Button APIs
+
+Here's a rundown of how the APIs we'll provide work:
+
+1. To use the button APIs, you need to include "BTN.h" in your main.c file
+  * Note that here, capital letters in the header name indicate this is a "public" header, and that
+     you can use the functions and types declared there freely. You'll notice the implementation file
+   is called "btn.c", this is because it's intended to be private to enforce encapsulation (modularity).
+     A "private" function is one that you aren't supposed to use since it's not made to be called outside
+     a very specific context.
+2. You then need to initialize the button module by calling `BTN_init` somewhere before your main loop,
+   you also need to check the return value of `BTN_init` in the event that it failed.
+   The default main program calls this for you.
+3. In your program, there are 4 APIs you can call:
+* {empty}
++
+[source, c]
+----
+bool BTN_is_pressed(btn_id btn)
+----
+Returns true if the given button is currently being pressed
+* {empty}
++
+[source, c]
+----
+bool BTN_check_clear_pressed(btn_id btn)
+----
+Returns true if the given button has been pressed since you last checked its internal flag, clears the internal flag upon returning
+* {empty}
++
+[source, c]
+----
+bool BTN_check_pressed(btn_id btn)
+----
+Returns true if the given button has been pressed since you last checked its internal flag, does not clear the internal flag upon returning
+* {empty}
++
+[source, c]
+----
+void BTN_clear_pressed(btn_id btn)
+----
+Returns nothing, clears the internal state flag of the given button
+
+Similarly to the LED api `btd_id` is an enum data type that defines `BTN0`, `BTN1`, `BTN2`, and `BTN3` corresponding to Button 1 to 4 on the nRF52840 dev kit respectively.
+
+`BTN_check_pressed` and `BTN_clear_pressed` are provided to give you more flexibility, but in most
+cases you will find that using either `BTN_is_pressed` or `BTN_check_clear_pressed` will be all that you need.
+
+==== Example program:
+
+Here is an example program:
+
+image::ExampleMainWithBtnApi.png[]
+
+Before running it, can you see what this program will do?
+Build this and flash it to your board. Now click the button 15 times and count how many times
+"Button 0 pressed!" got printed, do you still see bouncing?
+
+Once you have the button working you should add this change to git and commit it to the lesson 4 branch.
+
+== Exercises
+
+Create separate git commits for each part of the exercise. Once you're done with this lesson, push
+your changes to the lesson-4 branch of your repository.
+
+* Create a 4-bit binary counter using all 4 LEDs. An LED being off should represent a binary 0,
+  and an LED being on should represent a binary 1. The internal counter should increment each time
+  BTN0 is pressed. The LEDs should reset once the internal counter reaches 16.
+* Have an LED increase in brightness as you hold down a button.
+
+*Challenge:*
+1. Create a password system that uses BTN0, BTN1, BTN2 as inputs, and BTN3 as the "enter" button.
+   The program should start in a locked state with LED0 turned on. The user should be able to click
+   a combination of BTN0, BTN1, BTN2 (that you choose at compile time) as the passkey entry stage.
+   Once the user clicks BTN3, "Correct!" should be printed if the password was correct, and "Incorrect!"
+   should be printed if the password was wrong. After the user entered their password with BTN3, LED0
+   should turn off and your program should enter a "waiting" state. The user should be able to press
+   any button to reset the program back to its locked state while it's in the waiting state, and the
+   program should reset.
+
+2. When the board starts, turn LED3 on for 3 seconds. During those 3 seconds, the user should be able
+   to click BTN3, which puts the program into an "entry" mode until BTN3 is clicked again. The user should be
+   able to enter a password of their choice by entering a sequence of BTN0, BTN1, BTN2. Once they click BTN3,
+   the password should be saved, and the program should enter the locked state, where it should function the
+   same way as part 1 of this exercise.
+

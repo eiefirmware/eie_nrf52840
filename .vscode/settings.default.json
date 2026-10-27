@@ -22,4 +22,7 @@
 
     // Task Window Settings
     "task.quickOpen.showAll": false,
+
+    // Enable git blame in editor
+    "git.blame.editorDecoration.enabled": true,
 }
