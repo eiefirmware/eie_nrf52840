@@ -1,4 +1,4 @@
-= Advanced LEDs and Buttons: Embedded Primer
+= Advanced LEDs: Embedded Primer
 :doctype: article
 :imagesdir: imgs
 :toc:
@@ -67,6 +67,61 @@ This is the folder we will work with the most.
 * `scripts` contains helper scripts west uses to flash the board
 * `zephyr` contains a single file called the west manifest.
 When we ran `west update` in lesson 1 the west manifest was used to tell west what to update.
+
+==== The Zephyr build system
+
+The zephyr build system contains many parts to it.
+In your intro to C and C\++ courses you may have used the GNU C Compiler, GCC or the GNU C\++ Compiler G++.
+Zephyr uses a special version of the gnu toolchain built for compiling for an ARM architecture running Zephyr, `arm-zephyr-eabi-gcc`.
+The zephyr project is significantly more complex then the projects you will likely have made in your intro level courses, where even building a simple project like ours can include hundreds of source files.
+To accomplish this zephyr uses an extra build system on top of the GNU tool chains, which is shown below.
+
+.The Zephyr build process. Source Nordic Semiconductor <<nordic-build-system>>
+[]
+image::https://nrfconnectdocs.nordicsemi.com/ncs/latest/nrf/_images/ncs-toolchain.svg[]
+
+This whole process is run any time you run `west build`, however each step is documented in more detail below.
+
+* *Kconfig:* KConfig is a configuration system originally developed for linux kernel development.
+It allows developers to set configuration options for their application that are set at compile time.
+In Zephyr, Kconfig is used to enable specific features of the RTOS such as drivers for things like the GPIO or radio peripheral.
+In your project the KConfig settings you have set are stored in the `app/prj.conf` file.
+When the KConfig step of the build process is run, each config is generated into a pre-processor statement in the `build/zephyr/include/generated/zephyr/autoconf.h` file.
+Many KConfig options are auto set by choosing the board or by default being inherited from the zephyr project.
+* *Device Tree:* The device tree is another configuration system originally from linux kernel development.
+However, unlike KConfig which is used to configure software, the device tree is used to configure hardware features.
+In our case there are two device tree files that impact us: the microcontroller file and the board file.
+The microcontroller device tree definition file defines all the peripherals in the microcontroller and the addresses of the registers to control them.
+The board device tree definition file describes how the microcontroller is connected to other components on the board such as LEDs, buttons, or sensors and what peripherals on the microcontroller they are connected to.
+These files are found in the zephyr project itself.
+If you are curious these files are available below, however understanding them is not a requirement for this course.
++
+--
+** https://github.com/zephyrproject-rtos/zephyr/blob/v4.4.0/dts/arm/nordic/nrf52840.dtsi[nrf52840.dtsi]
+** https://github.com/zephyrproject-rtos/zephyr/blob/v4.4.0/boards/nordic/nrf52840dk/nrf52840dk_nrf52840.dts[nrf52840dk_nrf52840.dts]
+--
++
+It is also possible to override sections of the device tree which is useful for customizing hardware configuration for your project.
+Device tree overrides will be covered in a future lesson.
+More information on the device tree can be found in zephyr's documentation:
+https://docs.zephyrproject.org/latest/build/dts/index.html
+Similarly to KConfig, when the device tree build step runs a header file is generated containing the parsed configuration.
+This header is found in `build/zephyr/include/generated/zephyr/devicetree_generated.h`.
++
+Additionally Nordic's DevAcadamy introductory course on the nRF Connect SDK covers the device tree in more detail in link:https://academy.nordicsemi.com/courses/nrf-connect-sdk-fundamentals/lessons/lesson-2-reading-buttons-and-controlling-leds/topic/devicetree/[Lesson 2].
+* *Partition Manager:* The partition manager is a tool that comes from nordic and is not relevant to how our project is configured.
+* *CMake and Ninja:* CMake is what is known as a meta build system.
+That is it generates files that allows a real build system, in this case Ninja, to build our project.
+CMake's configuration lives in the `CMakeLists.txt` files.
+In general there is one `CMakeLists.txt` file per source directory in the project.
+The `CMakeLists.txt` file contains the source files in that directory, header files, and sub directories that are in that directory.
+Each item in a `CMakeLists` file can also be conditionally included based on a C pre-processor define (Often from KConfig in Zephyr).
+Exampled of the `CMakeLists.txt` can be found in the drivers directory in the EIE project.
+More information on CMake can be found in the official CMake documentation: https://cmake.org/cmake/help/latest/
++
+Ninja is a build system that will directly use the GNU toolchain to compile all files in the project.
+Ninja was designed to have a meta build tool, like cmake, generate its build configuration, rather than being hand written.
+The outputted ninja build script is found at `build/build.ninja` in the EIE project.
 
 === Embedded C
 
@@ -164,15 +219,6 @@ in the integer to the right by a specified number of bits.
 0b0100 >> 2 == 0b0001
 ----
 
-==== Hardware Abstraction via the Device Tree
-The Zephyr project uses a data structure called a device tree to describe the microcontroller and the board it is on.
-The microcontroller device tree definition file defines all the peripherals in the microcontroller and the addresses of the registers to control them.
-The board device tree definition file describes how the microcontroller is connected to other components on the board such as LEDs, buttons, or sensors and what peripherals on the microcontroller they are connected to.
-We won't cover too much about the device tree but more information can be found in the Zephyr documentation.
-https://docs.zephyrproject.org/latest/build/dts/index.html
-
-Additionally Nordic's DevAcadamy introductory course on the nRF Connect SDK covers the device tree in more detail in link:https://academy.nordicsemi.com/courses/nrf-connect-sdk-fundamentals/lessons/lesson-2-reading-buttons-and-controlling-leds/topic/devicetree/[Lesson 2].
-
 == Lesson
 
 === Project Configuration
@@ -180,13 +226,12 @@ Additionally Nordic's DevAcadamy introductory course on the nRF Connect SDK cove
 . Check out the `embedded_primer` branch:
 +
 ----
+git fetch upstream
 git checkout upstream/embedded_primer
 ----
 This branch sets up our repository for this lesson.
-. In the `app/` directory, create a new `src/` directory, as well as a new `main.c` file inside of `app/src/`. 
-. KConfig is a configuration system originally developed for linux kernel development.
-It allows developers to set configuration options for their application that are set at compile time.
-In Zephyr these options are used to enable or disable features in the kernal and enable specific libraries.
+. In the `app/` directory, create a new `src/` directory, as well as a new `main.c` file inside of `app/src/`.
+.
 +
 For now we need to enable the GPIO library in our application so that we can use it to control the LED.
 Open the `app/prj.conf` file in your editor.
@@ -194,15 +239,7 @@ We want to add a line to enable GPIO support in the application
 +
 image::prj_edits.png[]
 Nordic's DevAcadamy course on nRF Connect SDK fundamentals covers more on kConfig including adding your own configuration options in link:https://academy.nordicsemi.com/courses/nrf-connect-sdk-fundamentals/lessons/lesson-3-elements-of-an-nrf-connect-sdk-application/topic/exercise-2/[Exercise 2 of Lesson 3].
-. CMake is a meta-build tool; That is it doesn't compile source files on its own but rather tells other tools what to build.
-In our case CMake pulls in the list of source file from the `CMakeLists.txt` file, the project configuration via the kConfig file `prj.conf` and the device tree files which describe the board and its peripherals.
-It then generates files used by the ninja build system which uses the GNU toolchain to compile the application.
-+
-.The Zephyr build process. Source Nordic Semiconductor <<nordic-build-system>>
-[]
-image::https://nrfconnectdocs.nordicsemi.com/ncs/latest/nrf/_images/ncs-toolchain.svg[]
-+
-Open the `app/CMakeLists.txt` file in your editor.
+. Open the `app/CMakeLists.txt` file in your editor.
 We need to add the `main.c` file to the `CMakeLists.txt` file so that CMake knows where our source code is.
 In the future if we add more source files we will need to add them here as well.
 Add the following line to the `CMakeLists.txt` file:
@@ -223,6 +260,7 @@ This is a common pattern in embedded systems where there is no operating system 
 +
 image::minimum_main.png[]
 At this point the application should build but won't do anything.
+You may need to delete the build folder to clear cached files from CMake before this will compile.
 +
 ----
 west build -b nrf52840dk/nrf52840 app
@@ -231,6 +269,7 @@ west build -b nrf52840dk/nrf52840 app
 . Now we need to define which pin is connected to the LED.
 To do this first we need to get the LED pin configuration and fill our the zephyr GPIO device tree specification struct which is already defined for us in the Zephyr gpio.h file we included earlier.
 +
+.GPIO configuration struct from zephyr gpio.h
 image::dev_tree_gpio_struct.png[]
 This struct defines the GPIO pin using the port the pin is on, the pin number and a flag field.
 Most microcontrollers split their GPIO pins into multiple ports; The pins on each port typically are accessed through a single register.
@@ -307,8 +346,6 @@ Create a separate commit for each part of the exercise you complete. When you ar
 ----
 git push origin embedded_primer
 ----
-
-
 
 
 [bibliography]
