@@ -78,7 +78,7 @@ To accomplish this zephyr uses an extra build system on top of the GNU tool chai
 
 .The Zephyr build process. Source Nordic Semiconductor <<nordic-build-system>>
 []
-image::https://nrfconnectdocs.nordicsemi.com/ncs/latest/nrf/_images/ncs-toolchain.svg[]
+image::ncs-toolchain.svg[]
 
 This whole process is run any time you run `west build`, however each step is documented in more detail below.
 
