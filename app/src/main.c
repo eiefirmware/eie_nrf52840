@@ -1,35 +1,41 @@
-/**
- * @file main.c
- */
+/** * @file main.c */ 
+#include <inttypes.h> 
+#include <zephyr/kernel.h> 
+#include <zephyr/sys/printk.h> 
 
-#include <inttypes.h>
 
-#include <zephyr/kernel.h>
-#include <zephyr/sys/printk.h>
-
-#include "BTN.h"
-#include "LED.h"
+#include "BTN.h" 
+#include "LED.h" 
 
 #define SLEEP_MS 1
 
-int main(void) {
-  
-  uint8_t counter = 0;
+int main(void) { 
 
-  while(1){
-    if(BTN_check_clear_pressed(BTN0)){
-      counter++;
-      if(counter == 16){
-        counter = 0;
-      }
-      LED_set(LED0,(counter & 0x01) ? LED_ON : LED_OFF);
-      LED_set(LED1,(counter & 0x02) ? LED_ON : LED_OFF);
-      LED_set(LED2,(counter & 0x04) ? LED_ON : LED_OFF);
-      LED_set(LED3,(counter & 0x08) ? LED_ON : LED_OFF);
-      
-      printk("Counter: %d\n", counter);
-    }
-    k_msleep(10);
+  if (0 > BTN_init()){
+    return 0;
   }
-  return 0;
+  if (0 > LED_init()){
+    return 0;
+  }
+
+  LED_blink(LED0, LED_1HZ);
+
+  LED_set(LED1, LED_ON);
+  uint8_t duty_cycle = 0;
+
+  while(1) {
+    LED_pwm(LED2, duty_cycle);
+    
+    if (duty_cycle == 100){
+      duty_cycle = 0;
+      LED_toggle(LED3);
+    } else {
+      duty_cycle++;
+    }
+
+    k_msleep(SLEEP_MS);
+    
+  }
+    
+    return 0; 
 }
