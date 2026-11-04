@@ -9,33 +9,45 @@
 
 #define SLEEP_MS 1
 
-int main(void) { 
+int main(void) {
 
-  if (0 > BTN_init()){
+  if (0 > BTN_init()) {
     return 0;
   }
-  if (0 > LED_init()){
+  if(0 > LED_init()){
     return 0;
   }
-
-  LED_blink(LED0, LED_1HZ);
-
-  LED_set(LED1, LED_ON);
-  uint8_t duty_cycle = 0;
 
   while(1) {
-    LED_pwm(LED2, duty_cycle);
-    
-    if (duty_cycle == 100){
-      duty_cycle = 0;
-      LED_toggle(LED3);
-    } else {
-      duty_cycle++;
-    }
 
-    k_msleep(SLEEP_MS);
-    
   }
-    
-    return 0; 
+
+  }
+
+  void password_input(void) {
+
+    int password[];
+    int end = 1;
+
+    for(int i = 0; end == 1 ;i++){
+      if (BTN_check_clear_pressed(BTN0)){
+        password[i] = 0;
+        i++;
+    }
+      if(BTN_check_clear_pressed(BTN1)){
+        password[i] = 1;
+        i++;
+      }
+      if(BTN_check_clear_pressed(BTN2)){
+        password[i] = 2;
+        i++;
+      }
+  }
 }
+
+  
+
+
+
+
+
