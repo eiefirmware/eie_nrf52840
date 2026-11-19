@@ -120,9 +120,79 @@ colour_t colour = RED;
 Enums are often used to define integer constants that are related to each other.
 We will use enums to define the different states of state machines.
 
-=== Zephyr State Machine API
+=== Implementing a state machine in C
 
-Zephyr provides a framework for creating state machines called the state machine framework.
+There are many ways you can implement a state machine in C.
+In the section below a few are covered briefly
+
+==== Switch Case State Machine
+
+One of the easiest ways to implement a state machine is with a switch case statement.
+
+[source,c]
+----
+void statemachine_run(int input)
+{
+    static state_t state = STATE0;
+
+    switch (state)
+    {
+        case STATE0:
+            // ...
+            break;
+
+        case STATE1:
+            // ...
+            break;
+
+        case STATE2:
+            // ...
+            break;
+
+        case STATE3:
+            // ...
+            break;
+    }
+}
+----
+In each case you would handle how the particular input is processed for the given state.
+In this case generally `state_t` and the corresponding states are defined in an enum.
+This method has the advantage that it is easy to implement at first, but as our state machine grows, this can quickly grow out of hand.
+
+==== Function Table
+
+Another example of a common pattern for implementing a state machine is a function table.
+In this case each state has a function that runs it placed into a constant list as a function pointer.
+A separate static state variable tracks the current state of the system.
+[source, C]
+----
+typedef void (*state_func_p_t)(int);
+
+void state0_proc(int);
+void state1_proc(int);
+void state2_proc(int);
+void state3_proc(int);
+
+static state_t state = STATE0;
+
+static const state_func_p_t state_table[] = {
+    [STATE0] = state0_proc,
+    [STATE1] = state1_proc,
+    [STATE2] = state2_proc,
+    [STATE3] = state3_proc,
+};
+
+void statemachine_run(int input) {
+    state_table[state](input);
+}
+
+----
+
+
+==== Zephyr State Machine API
+
+Zephyr provides a framework for creating state machines called the state machine framework, which is what we will be using in this lesson.
+The zephyr state machine framework is similar to the function table described above.
 The documentation for the state machine framework is available at: https://docs.zephyrproject.org/latest/services/smf/index.html
 
 == Lesson
@@ -132,7 +202,7 @@ Run `git fetch upstream main` to fetch the latest changes from the upstream bran
 . Then run `git checkout main` to checkout your local copy of the main branch. If this step fails you likely have files from lesson 4 that are not commited. Commit those files to the lesson 4 branch before continuing
 . Next run `git pull upstream main` to get your main branch synced with the upstream branch.
 . At this point you can check you are in the correct spot either using a tool like the vs code Git Graph extension, gitk or by running the command `git log -1 --oneline` which will tell you that you are on the branch main and are also at the tip of upstream/main. Optionally at this point you can run `git push origin main` to syncronize the updates with your fork.
-. At this point you can create a new branch for lesson 5 by running `git checkout -b lesson-5`
+. At this point you can create a new branch for lesson 6 by running `git checkout -b lesson-6`
 
 === Create a simple state machine
 
@@ -143,13 +213,13 @@ The state diagram is drawn below
 +
 image::led_sm.png[]
 This is a rather simple state machine with only 2 states, however as you start to work with more complicated machines this process becomes invaluable.
-. Next we need to enable the state machine framework in kconfig. Similarly to when we enabled the GPIO in lesson 3 we need to enable the state machine framework by adding the `CONFIG_SMF` to the `prj.conf` file in `app`. The `prj.conf` should look like the below afterwards.
+. Next we need to enable the state machine framework in kconfig. Similarly to when we enabled the GPIO in lesson 6 we need to enable the state machine framework by adding the `CONFIG_SMF` to the `prj.conf` file in `app`. The `prj.conf` should look like the below afterwards.
 +
 image::prj_edits.png[]
 . To organize our code better we are going to split the state machine into a separate C and H file. In the app/src folder create the files `my_state_machine.c` and `my_state_machine.h`. Similarly to when we initially created the main.c file we need to add the new source file to the `app/CMakeLists.txt` file. After adding the new source file the `CMakeLists.txt` file should have the following
 +
 image::cmake_edits.png[]
-NOTE: As we have modified the cmake source files you may need to do a clean build which you can either do by deleting the `build` folder or adding the `-p always` option when you run `west build`
+NOTE: As we have modified the cmake source files you may need to do a clean build which you can either do by deleting the `build` folder or adding the `-t pristine` option when you run `west build`
 . At this point you should stage your changes in git and commit
 . Now we will create 2 function prototypes in the header file we made.
 +
@@ -200,8 +270,7 @@ The complete definitions for our state machine are given below
 +
 image::state_function_definitions.png[]
 At this point you should be able to build and flash the board and see the LED blink at about 1 Hz.
-If you haven't already done so commit your changes to the lesson 5 branch
-
+If you haven't already done so commit your changes to the lesson 6 branch
 
 == Exercise
 
@@ -213,3 +282,42 @@ Complete the following exercises. Make sure to use git to track your changes.
 image::exercise_sm.png[]
 For each state also print upon entering and exiting the state to the console
 * Rewrite the password lock exercise from lesson 4 using a state machine.
+
+== Mini Project
+
+This week's exercise is intended to pull together all of the content taught in EiE so far and is meant to be a mini project.
+You might not finish the entire exercise during this week's session but you are encouraged to try to finish it before winter semester.
+There are parts of this exercise where you'll be told to collaborate, but you should do all other parts on your own to get the most out of this exercise.
+
+=== Specifications
+
+Create a Finite State Machine (FSM) based program that follows all the following criteria:
+
+* There should be a state where the board accepts input from BTN0 and BTN1 to enter an 8-bit ASCII code.
+  The user should be able to click BTN2 to reset the bits already entered (in case they make a mistake), and they should be able to click BTN3 to save the ASCII code.
+  LED0 and LED1 should blink when the corresponding button was clicked so the user knows their input has been detected.
+  While in this state, LED3 should blink at 1 Hz.
+* After a single ASCII code has been saved, the user should be able to:
+** Enter another ASCII code (so that they can create a string of characters that are saved into the program) by using BTN0 and BTN1
+** Click BTN2 to delete the entire string they've entered so far and go back to the character entry state
+** Click BTN3 to save the entire string they've entered so far. While in this state, LED3 should blink at 4 Hz.
+* When the user decides to save the string they entered, they should be able to:
+** Click BTN2 to delete the string they entered and go back to the entry state
+** Click BTN3 to send it to the serial monitor
+   While in this state, LED3 should blink at 16 Hz.
+* At any point, the user should be able to hold down BTN0 and BTN1 for 3 seconds to go to a special "standby" state where all four LEDs gently pulse between fully off and fully on using PWM to vary brightness.
+  The user should be able to click any button to exit this state and go back to whatever state they were just in.
+
+### Instructions
+
+1. Create a finite state machine transition diagram that captures all the above requirements, compare it with a friend and identify gaps/uncertainties in the specification provided.
+   Try to address all possible behaviour in your state diagram.
+   You can do the diagram in whatever way you are most familiar (pencil + paper, tablet, plantuml, etc)
+   - Note: it's very common as an engineer to be given an incomplete or confusing specification, if there's a case that wasn't addressed in the specification above (there are several) it is up to you to make an assumption about what would be a reasonable outcome
+2. Implement the state machine you've just designed
+3. Test your project by going through each use case and make sure it follows the specifications, if it does, show it to a leader
+
+### Tips
+
+- Try to incorporate incremental design, this will make it easier to keep track of what has and hasn't been finished, and it will prevent you from getting intimidated by the bigger picture. It is recommended that you make a git commit after each logical step in your implementation.
+- Use detailed printk statements throughout your code to make debugging easier
