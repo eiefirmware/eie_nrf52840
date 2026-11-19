@@ -272,6 +272,39 @@ image::state_function_definitions.png[]
 At this point you should be able to build and flash the board and see the LED blink at about 1 Hz.
 If you haven't already done so commit your changes to the lesson 6 branch
 
+=== Event driven state machine
+
+Current our state machine is updated every time the main thread exits sleep.
+In some cases we would rather have an input like a button or some other event trigger the state machine.
+While we could wake the CPU up from sleep, poll to see if the button has been pressed, and process the state if appropriate on a regular interval, this would be inefficient.
+Let's modify our state machine to instead trigger on a button update directly.
+
+. The first step for us to do this is to remove the sleep k_sleep call within main.
++
+image::main_no_sleep.png[]
+. Now the rest of our work will be updating the state machine within the my_state_machine.c file.
+First we need to include the button header and the zephyr kernel header.
++
+image::state_machine_updated_headers.png[]
+. To have our state machine update on a button press we will use the zephyr event system.
+For more information on how the event system works, and how you can define your own events read the https://docs.zephyrproject.org/latest/kernel/services/synchronization/events.html[zephyr documentation].
+The button header defines an event for each button being pressed within a bitfield.
+We will first need to update the state machine object we created to track the events that have occured.
++
+image::state_machine_event_track.png[]
+. We can then use zephyr's `k_event_wait_safe` API to wait for one of these button events to be triggered.
+This API returns the events that have occurred, which we will write to the event field we just added to the state machine object.
++
+image::state_machine_event_run.png[]
+. Finally we can update the state run functions to read the events and if the event we want has occurred, transition state.
+In this case I chose to transition from the on to off state if button 0 was pressed, and off to on if button 1 was pressed.
++
+image::state_machine_state_events.png[]
++
+At this point you can build and flash the project and should see the state machine update with the button presses.
+If you add some extra prints you should also see that the main while loop is now only being updated on a button event.
+You should commit your changes to git at this point.
+
 == Exercise
 
 Complete the following exercises. Make sure to use git to track your changes.
@@ -281,7 +314,7 @@ Complete the following exercises. Make sure to use git to track your changes.
 +
 image::exercise_sm.png[]
 For each state also print upon entering and exiting the state to the console
-* Rewrite the password lock exercise from lesson 4 using a state machine.
+. Rewrite the password lock exercise from lesson 4 using a state machine.
 
 == Mini Project
 

@@ -6,6 +6,7 @@ Header to define button interface
 #define BTN_H
 
 #include <stdbool.h>
+#include <zephyr/kernel.h>
 
 /* ----------------------------------------------------------------------------
                                     TYPES
@@ -17,6 +18,19 @@ typedef enum btn_id_t {
   BTN3,
   NUM_BTNS,
 } btn_id;
+
+typedef enum btn_event_id_t {
+  BTN0_EVENT = BIT(BTN0),
+  BTN1_EVENT = BIT(BTN1),
+  BTN2_EVENT = BIT(BTN2),
+  BTN3_EVENT = BIT(BTN3),
+  BTN_ANY_EVENT = BTN0_EVENT | BTN1_EVENT | BTN2_EVENT | BTN3_EVENT,
+} btn_event_id;
+
+/*-----------------------------------------------------------------------------
+                                Global Variables
+-----------------------------------------------------------------------------*/
+extern struct k_event btn_event;
 
 /* ----------------------------------------------------------------------------
                               Public Functions
