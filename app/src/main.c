@@ -30,8 +30,6 @@ int main(void) {
     if (0 > ret) {
       return(0);
     }
-
-    k_msleep(SLEEP_MS);
   }
   return(0);
 }
