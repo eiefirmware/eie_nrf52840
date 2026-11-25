@@ -1,0 +1,60 @@
+= BLE Intro
+:doctype: article
+:imagesdir: imgs
+:source-highlighter: highlight.js
+:toc:
+
+== Introduction
+
+One of the most powerful things that computers can do is communicate information information between them.
+Typically, this communication is done digitally, where bits and bytes are encoded and sent across some physical media, such as electrical conductors (wires, traces, etc.), optical fibres, or what we're going to be focussing on, RF (radio frequencies).
+
+In todays lesson we will be looking at Bluetooth Low Energy to
+
+=== Intro to Bluetooth Low Energy
+
+
+==== Additional Resources
+
+- https://www.oreilly.com/library/view/getting-started-with/9781491900550/[Getting started with Bluetooth Low Energy]: An introductory textbook on BLE.
+Chapters 1-4 are the most relevant sections for EIE.
+You should have access to this textbook via the University library.
+- https://www.bluetooth.com/bluetooth-le-primer/[Bluetooth LE Primer]: A more introductory resource released by the Bluetooth SIG
+- https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core_v7.0/out/en/index-en.html[Bluetooth Core Specification]
+
+== Software Install
+
+We will be using the nRF Connect tool created by Nordic Semiconductors.
+It allows us to control the radio on the nRF52840 via a simple graphical user interface.
+
+. Download and install the latest version of nRF Connect for Desktop for your computer from here: https://www.nordicsemi.com/Products/Development-tools/nrf-connect-for-desktop.
++
+NOTE: A Mobile version of nRF connect also exists for iOS and Android.
+We will not be using this tool as the iOS version has limited functionality compared to the Android and Desktop tool, however feel free to download and play around with it on your phone.
+. When you launch nRF Connect for the first time you will be greeted with the below window.
+If you get a prompt telling you to update your jLink version, just hit close to ignore it.
+Once you see the main window, install and launch the Bluetooth Low Energy application.
++
+image::nrf-connect-launch.png[]
+. When you launch the Bluetooth Low Energy app you will see the window below.
++
+image::ble-app-launch.png[]
++
+Click on Select Device and you should see your board listed as `nRF52840 DK` with its serial number below.
+Select your board.
+When prompted to program the board hit yes.
+. At this point you should see your board in the Connection Map panel to the right.
+If your board is not their call a leader over.
++
+image::board-connected.png[]
+
+
+== Lesson
+
+This lesson will require two computers and two boards,
+Partner up with the person next to you for the deration of this lesson.
+To start with choose one person to implement the peripheral device and one person to implement the central device.
+
+
+
+== Exercises
