@@ -1,0 +1,8 @@
+@startuml
+alt
+Client -> Server: ATT_WRITE_REQ, handle, data
+Server -> Client: ATT_WRITE_RSP, Success/Fail
+else
+Client -> Server: ATT_WRITE_CMD, handle, data
+end
+@enduml

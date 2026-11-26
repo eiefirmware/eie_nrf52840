@@ -1,0 +1,15 @@
+@startuml
+
+[*] -down-> Standby
+Standby -right-> Initiating
+Initiating -> Standby
+Standby -left-> Advertising
+Advertising -right-> Standby
+Standby <-down- Connection
+Standby -up-> Scanning
+Scanning -> Standby
+
+Initiating --> Connection
+Advertising --> Connection
+
+@enduml
