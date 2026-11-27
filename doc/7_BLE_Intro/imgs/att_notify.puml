@@ -1,0 +1,7 @@
+@startuml
+Client -> Server: Subscribe to notifications
+
+Server -> Client: ATT_HANDLE_VALUE_NTF, handle, data
+note right: The notify can be sent at any time from\nthe server after the client subscribes.
+
+@enduml

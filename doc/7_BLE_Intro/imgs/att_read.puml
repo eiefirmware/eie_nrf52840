@@ -1,0 +1,6 @@
+@startuml
+
+Client -> Server: ATT_READ_REQ, handle
+Server -> Client: ATT_READ_RSP, data
+
+@enduml

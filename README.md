@@ -27,7 +27,7 @@ The firmware used for EIE is based on the Zephyr RTOS and is contained within th
 4. [Basic LED and Buttons](doc/4_Beginner_LEDs_and_Buttons/Beginner_LEDs_and_Buttons.adoc)
 5. [Advanced LED and Buttons](doc/5_Advanced_LEDs_And_Buttons/embedded_primer.adoc)
 6. [State Machines](doc/6_State_Machines/state_machines.adoc)
-7. [BLE Intro](doc/7_BLE_Intro/README.md) - Being updated
+7. [BLE Intro](doc/7_BLE_Intro/BLE_intro.adoc)
 8. [BLE]() - Being updated
 10. [Serial Protocols](doc/10_Serial_Protocols/serial_protocols.adoc)
 11. [Zephyr Modules](doc/11_Zephyr_Modules/zephyr_modules.adoc)

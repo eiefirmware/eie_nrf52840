@@ -1,0 +1,333 @@
+
+= BLE Intro
+:doctype: article
+:imagesdir: imgs
+:source-highlighter: highlight.js
+:toc:
+
+== Introduction
+
+One of the most powerful things that computers can do is communicate information information between them.
+Typically, this communication is done digitally, where bits and bytes are encoded and sent across some physical media, such as electrical conductors (wires, traces, etc.), optical fibres, or what we're going to be focussing on, RF (radio frequencies).
+
+In todays lesson we will be looking at Bluetooth Low Energy as a specific way information can be transmitted between devices.
+
+=== Intro to Bluetooth Low Energy
+
+Bluetooth Low Energy (BLE) is a wireless communication standard managed by the Bluetooth Special Interest Group.
+It differs from Bluetooth Classic in that it has lower power consumption, and a lower data throughput.
+
+The BLE protocol stack is made of many layers that are grouped in 3 parts, the application, host, and controller.
+
+.The BLE Protocol Stack <<nordic-protocol-stack>>
+image::stack_diagram.png[]
+
+The Application is the highest layer of the protocol stack.
+It is where the user facing software typically lives.
+
+==== The BLE Controller
+
+The BLE controller is the lowest layer of the BLE stack.
+It is composed of 2 layers: the Physical layer (phy) and Link Layer (LL).
+For the level of work we are doing in EIE we can largely ignore the controller layers however there is still some useful details.
+
+The physical layer determines how the data actually goes out to the radio.
+BLE operates on the 2.4 GHz ISM band from 2400 MHz to 2483 MHz over 40 channels where each channel has a bandwidth of 2 MHz.
+
+.BLE Channel Distribution <<sig-primer>>
+image::ble-channels.svg[]
+
+By default BLE modulates the data at a 1 Mbps data rate using a Gaussian Frequency Shift Keying (GFSK) modulation scheme.
+Other phys are supported by BLE that can increase the data rate, or range of the signal.
+
+The Link Layer is the upper layer of the BLE Controller.
+The Link Layer implements a state machine to control the radio and defines the lowest layer of packets in the stack.
+The link layer defines the following states a BLE connection can be in.
+These states are
+
+- Standby
+- Advertising
+- Scanning
+- Initiating
+- Connection
+
+Which are linked in the following state machine
+
+image::ll_state.png[]
+
+The standby state is the starting state of the state machine, where the radio is not receiving or transmitting.
+In the advertising state the radio is broadcasting packets for other devices to find.
+In the scanning state the radio is listening for the advertising packets of all nearby devices.
+In the Initiating state the radio is listening for advertising packets from the specific device.
+Once that device is found it will attempt connection.
+The Connection state is used when a device is in an active connection with another device.
+When connected the link layer defines two roles for the devices forming the connection.
+The Central Role and Peripheral Role.
+The device that enters the connection state from the initiating role is the central and the device that enters the connection state from the advertising role is the peripheral.
+
+Once connected the two devices decide how often to talk to each other.
+This time is known as the connection interval.
+The connection interval can be between 7.5 ms to 4000 ms in increments of 1.25 ms.
+Once every connection interval the central will send a packet to the peripheral, which may respond with its own packets.
+When the central sends the first packet to the peripheral each connection interval is known as the Connection Event.
+
+.Simplified diagram of the connection event <<nordic-conn-events>>
+image::conn_events.png[]
+
+In some cases the peripheral and central may agree to allow the peripheral to skip receiving and acknowledging some connection events to save power.
+The number of connection events the peripheral is allowed to skip is known as either the peripheral latency or slave latency.
+
+The controller "talks" to the host via the Host Controller Interface protocol defined in the Bluetooth Core spec.
+Depending on the system architecture, the host and controller can be implemented on the same SoC, like with the nRF52840, or on multiple ICs where the HCI is implemented over a communication bus like UART, USB, SDIO, SPI or others.
+
+==== The BLE Host
+
+The BLE host implements the upper layers of the BLE stack.
+
+The lowest layer of the host is the Logical Link Control and Adaption Protocol (L2CAP).
+The L2CAP layer primarily acts as a multiplexer that takes data from the higher protocol layers and encapsulates it into standard packets that can be communicated to the controller.
+
+The Security Manager Protocol (SMP) manages provides the bluetooth stack a way to generate and exchange encryption keys with peers.
+
+The Generic Access Profile (GAP) interfaces directly with the application to expose connection related services.
+
+The Attribute (ATT) layer defines a server client protocol used to send data between two connected devices over BLE.
+The Generic Attribute (GATT) profile defines a higher layer protocol on top of the basic ATT procedures defining a hierarchical structure for data access.
+
+
+==== The Generic Access Profile
+
+GAP exposes the connection role (Central, Peripheral), the security features from the SMP to the application.
+It also defines the format for advertising data.
+A single advertising packet can contain up to 31 bytes of data.
+The full advertising packet is split up into multiple structures called advertisement data structures (AD structure).
+The AD structure contains the length of the structure, the type of data in the structure, and data.
+Common pieces of data included in the advertising packet are
+
+* Complete Local Name: This is the name of the advertising device
+* Shortened Local Name: A truncated version of the name if the full name can't fit
+* Services: A list of services offered by the device.
+Useful for determining what a device will offer when connected.
+
+A full list of AD types is defined in the Bluetooth Assigned Numbers and Core Specification Supplement Documents.
+
+==== The Attribute Protocol and Generic Attribute Profile
+
+As mentioned the Attribute layer defines a server-client protocol for exchanging data.
+The device offering the server provides a list of attributes the client can interact with.
+These attributes have an identifier, permissions that describes how we can interact with the attribute and value that holds data associated with them.
+The attribute identifier is referred to as the handle.
+
+For our purposes the attribute permissions we care about and how they exchange data are listed below.
+
+* *READ*: The read property allows the client to read data from an attribute offered by the server.
+The client sends a read request with the attribute handle, asking the server for the data from the specified attribute.
+The server then responds with a read response with the data.
++
+image::att_read.png[]
+* *Write*: The write property allows the client to write data to an attribute offered by the server.
+The client either sends a write request or write command, attribute handle and data it wants to write to the specified attribute.
+If a write request is used the server responds with a write response specifying if the write was successful or failed.
+A write command does not provide any feedback.
++
+image::att_write.png[]
+* *Notify*: The notify property allows the server to send data asyncronously to clients that have subscribed for notifications.
++
+image::att_notify.png[]
+
+An attribute can have multiple of these permissions associated with it at a time.
+
+By default the data value in any of the attributes can be up to 23 bytes, known as the Maximum Transfer Unit (MTU).
+The MTU can be negotiated on the connection up to 244 bytes through additional att commands.
+If a device attempts to send more data then the connection MTU allows, the stack will segment the data into smaller chunks and send it over the air in multiple packets.
+
+The Generic Attribute Profile takes the attributes defined by ATT and organizes them into a hierarchical structure.
+The GATT structure consists of profiles, services, characteristics, and desciptors.
+
+.The GATT hierarchy <<sig-gatt>>
+image::gatt.webp[]
+
+Starting from towards the bottom of the hierarchy, a chararacteristic stores data.
+A characteristic is made up of at least 2 attributes.
+It must contain the characteristic declaration attribute, which defines metadata associated with the characteristic and the characteristic value attribute.
+
+Moving up the hierarchy a service is a collection of related characteristics and a profile is a collection of related services.
+For example, the Heart Rate Service contains the Heart Rate Measurement (Notifies the current Heart rate measured by a heart rate sensor), Body Sensor Location (allows the client to read the location the sensor is on the body), and Heart Rate Control Point (Allows the client to write control information to the sensor) characteristics.
+The Heart Rate Profile specifies that devices that include the heart rate service shall also include the Device Information Service.
+
+Descriptors are optional attributes that can be attached to characteristics.
+For EIE, the only case we really need to know where descriptors are used is the Client Characteristic Configuration Descriptor (CCCD), which a client will write to to subscribe to notifications from the associated characteristic.
+
+Services and Characteristics are also each assigned a Universally Unique ID (UUID) to identify the service.
+Some services and characteristics have a UUID assigned by the Bluetooth SIG in the Bluetooth SIG assigned Numbers document.
+For example the heart rate service UUID is 0x180D and the Heart Rate measurement UUID is 0x2A37.
+If you are implementing a custom service a 128-bit UUID is used, which can be randomly generated.
+The UUID is mapped to the attribute handles for the appropriate characteristics on the device.
+
+There is no correlation between the GATT roles and the GAP roles.
+A device can be either a GATT client or server when in either the GAP central or GAP peripheral role.
+Similarly a device can be both a GATT client for one service and a GATT server for another service on the same connection.
+
+==== Additional Resources
+
+If you are interested in learning more about bluetooth, the following resources are a good starting place.
+The resources are ordered from most approachable to most complex.
+
+- https://academy.nordicsemi.com/courses/bluetooth-low-energy-fundamentals/[Bluetooth Low Energy Fundamentals]: An introductory free ~10 hour course on bluetooth offered by Nordic Semiconductors.
+- https://www.oreilly.com/library/view/getting-started-with/9781491900550/[Getting started with Bluetooth Low Energy]: An introductory textbook on BLE.
+Chapters 1-4 are the most relevant sections for EIE.
+You should have access to this textbook via the University library.
+- https://www.bluetooth.com/bluetooth-le-primer/[Bluetooth LE Primer]: A more introductory resource released by the Bluetooth SIG
+- https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core_v7.0/out/en/index-en.html[Bluetooth Core Specification]
+
+== Software Install
+
+We will be using the nRF Connect tool created by Nordic Semiconductors.
+It allows us to control the radio on the nRF52840 via a simple graphical user interface.
+
+. Download and install the latest version of nRF Connect for Desktop for your computer from here: https://www.nordicsemi.com/Products/Development-tools/nrf-connect-for-desktop.
++
+NOTE: A Mobile version of nRF connect also exists for iOS and Android.
+We will not be using this tool as the iOS version has limited functionality compared to the Android and Desktop tool, however feel free to download and play around with it on your phone.
+. When you launch nRF Connect for the first time you will be greeted with the below window.
+If you get a prompt telling you to update your jLink version, just hit close to ignore it.
+Once you see the main window, install and launch the Bluetooth Low Energy application.
++
+image::nrf-connect-launch.png[]
+. When you launch the Bluetooth Low Energy app you will see the window below.
++
+image::ble-app-launch.png[]
++
+Click on Select Device and you should see your board listed as `nRF52840 DK` with its serial number below.
+Select your board.
+When prompted to program the board hit yes.
+. At this point you should see your board in the Connection Map panel to the right.
+If your board is not their call a leader over.
++
+image::board-connected.png[]
+
+
+== Lesson
+
+This lesson will require two computers and two boards,
+Partner up with the person next to you for the deration of this lesson.
+To start with choose one person to implement the peripheral device and one person to implement the central device.
+
+=== Basic Operations
+
+To start with lets implement a GATT server that provides all the operations we talked about above on both devices.
+
+. On both computers enter the server setup tab at the top of nRF Connect.
+Click the button that says New Service and enter the UUID `ABCD` (the UUID is in hex), name the service, and hit save.
++
+image::service_setup.png[]
+. Next click the new characteristic button and enter the UUID `ABCE`, name the service, select the Read property and hit save.
++
+image::read_char_setup.png[]
+. Next we will add a characteristic with the write property.
+Click the new characteristic button, enter the UUID `ABCF`, name the service, select the write property and hit save.
++
+image::write_char_setup.png[]
+. Finally we will add a characteristic with the notify property.
+Click the new characteristic button, enter the UUID `ABD0`, name the service, select the notify property and hit save.
++
+image::notify_char_setup.png[]
+. As mentioned the notify characteristic requires the CCCD descriptor.
+Click the new descriptor button under the notify characteristic, enter the UUID `2902` and hit save.
+At this point you can hit apply to device to use this server setup.
++
+image::cccd_setup.png[]
+. Now back in the connection map you should see the server populated under your device.
+Click the gear icon in the top right of your device and hit Advertising Setup.
++
+image::open_adv_setup.png[]
+. In the advertising setup window select the AD type "UUID 16 bit complete list", enter ABCD in the value field and hit "Add to advertising data".
+Then select the AD type "Complete Local Name", enter a unique name for your device and hit "Add to advertising data".
+When done hit Apply and Close.
++
+image::adv_setup.png[]
+. At this point some instructions will be specific to the device being the central and some instructions will be specific to the peripheral device.
+On the computer running the peripheral, select the gear icon and hit start advertising.
++
+image::start_adv.png[]
+. On the computer running the central, hit start scan in the side bar on the left.
+You can use the filter options to find your partners advertising board either by address or advertising name.
+Once you find your partners board, hit "Connect".
++
+image::scanning.png[]
+. At this point you will see the two board connected.
+The board connected to your computer will appear on the left, with the remote device appearing on the right.
++
+NOTE: In the screenshot I renamed the remote devices Central and Peripheral in the Generic Access Device Name characteristic, but that is optional.
++
+image::connected.png[]
+. Let's read data.
+On either device enter some data in hex into the read characteristic and hit the checkmark.
++
+image::read_enter_data.png[]
++
+On the other computer, expand the remote devices service, find the read characteristic and if it hasn't updated hit the refresh button.
++
+image::read_success.png[]
++
+Try changing the value in the read field a few times and seeing it update by hitting the refresh button on the connected device
+. Now let's write data.
+On one computer, expand the remote devices service, find the write characteristic, add some data to it and hit the checkmark to write.
++
+image::write_data.png[]
++
+You should see the data appear instantly on the other computer.
++
+image::write_success.png[]
++
+Try writing a few different pieces of information.
+. Finally let's use the notify characteristic.
+On one computer, expand the remote devices service and hit the play button in the notify characteristic to subscribe to notifications.
++
+image::notify_start.png[]
++
+At this point if you expand the notification property to see the CCCD, you will see its value change from `00 00` to `01 00`, which means notifications have been enabled.
+We can now add data in the server and hit the checkmark to send it.
++
+image::notify_data.png[]
++
+You should see the data appear on the other device.
++
+image::notify_recieved.png[]
++
+Try notifying a few different values.
+See what happens if you send a notify when the remote device is not subscribed to your CCCD.
+
+== Exercises
+
+The Bluetooth SIG defines many services and profiles for common use cases.
+One of the simplest of these services is the Heart Rate service.
+Follow the https://www.bluetooth.com/specifications/specs/html/?src=HRS_v1.0/out/en/index-en.html[Heart Rate Service] Specification to add the HR service to your GATT server.
+Just add the mandatory Heart Rate Measurement characteristic.
+Also add the HR service to your advertising information.
+
+You may need the following resources:
+
+- Bluetooth Assigned Numbers: https://www.bluetooth.com/specifications/assigned-numbers/
+- GATT Specification Supplement: https://www.bluetooth.com/specifications/gss/
+
+When complete you should be able to see the Heart rate service and measurement characteristic on the remote device after re-connecting.
+
+image::hr_server.png[]
+
+If you have an app on your phone that can connect to a bluetooth Heart rate sensor, you may be able to connect to it and see the Heart rate value update.
+For example the nRF Connect mobile app decodes the HR measurement characteristic and shows the packet `00 50` as 80 BPM.
+
+image::nRF_mobile.png[]
+
+
+[bibliography]
+== References
+
+* [[[nordic-protocol-stack, 1]]] Nordic Semiconductor. _What is Bluetooth LE?_ [Online] Available:
+https://academy.nordicsemi.com/courses/bluetooth-low-energy-fundamentals/lessons/lesson-1-bluetooth-low-energy-introduction/topic/what-is-bluetooth-le/?version=v3.4.0
+* [[[sig-primer, 2]]] Bluetooth SIG. _Bluetooth LE Primer_ [Online] Available: https://www.bluetooth.com/bluetooth-le-primer/
+* [[[nordic-conn-events, 3]]] Nordic Semiconductor. _Connection process_ [Online] Available: https://academy.nordicsemi.com/courses/bluetooth-low-energy-fundamentals/lessons/lesson-3-bluetooth-le-connections/topic/connection-process/?version=v3.4.0
+* [[[sig-gatt, 4]]] Bluetooth SIG. _Bluetooth Core Specification 7.0 Volume 3. Host Part G. Generic Attribute Profile (GATT) Specification_ [Online] Available: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core_v7.0/out/en/host/genericattribute-profile-gatt--specification.html
+
+
