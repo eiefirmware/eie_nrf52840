@@ -20,7 +20,7 @@ It differs from Bluetooth Classic in that it has lower power consumption, and a 
 The BLE protocol stack is made of many layers that are grouped in 3 parts, the application, host, and controller.
 
 .The BLE Protocol Stack <<nordic-protocol-stack>>
-image::https://academy.nordicsemi.com/wp-content/uploads/2023/04/MicrosoftTeams-image-29.png[]
+image::stack_diagram.png[]
 
 The Application is the highest layer of the protocol stack.
 It is where the user facing software typically lives.
